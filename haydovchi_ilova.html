@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>🚛 Haydovchi Hisoboti</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg: #f0f2f7;
+  --card: #ffffff;
+  --border: #e2e6f0;
+  --accent: #2563eb;
+  --accent-light: #eff4ff;
+  --green: #16a34a;
+  --green-light: #f0fdf4;
+  --red: #dc2626;
+  --red-light: #fff5f5;
+  --orange: #ea580c;
+  --orange-light: #fff7ed;
+  --purple: #7c3aed;
+  --purple-light: #f5f3ff;
+  --yellow: #ca8a04;
+  --yellow-light: #fefce8;
+  --text: #0f172a;
+  --text2: #64748b;
+  --text3: #94a3b8;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Rubik', sans-serif;
+  --radius: 14px;
+  --shadow: 0 2px 12px rgba(0,0,0,.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+
+/* ─── TOP HEADER ─── */
+.app-header {
+  background: var(--accent);
+  color: #fff;
+  padding: 16px 16px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.app-header-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.app-logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.app-reys-badge {
+  background: rgba(255,255,255,.2);
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+.header-right { margin-left: auto; display: flex; gap: 8px; }
+
+/* Step tabs */
+.step-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.step-tabs::-webkit-scrollbar { display: none; }
+.stab {
+  flex-shrink: 0;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.2);
+  color: rgba(255,255,255,.7);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.stab.active {
+  background: #fff;
+  color: var(--accent);
+  border-color: #fff;
+}
+.stab.done {
+  background: rgba(255,255,255,.3);
+  color: #fff;
+  border-color: rgba(255,255,255,.4);
+}
+
+/* ─── MAIN ─── */
+.main { padding: 12px 12px 0; }
+
+/* ─── SECTION ─── */
+.section {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+.section-head .icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.section-head .stitle { font-size: 14px; font-weight: 700; flex: 1; }
+.section-head .scount {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text2);
+}
+.section-head .schevron {
+  font-size: 12px;
+  color: var(--text3);
+  transition: transform .2s;
+}
+.section-head.open .schevron { transform: rotate(180deg); }
+.section-body { padding: 14px 16px; display: none; }
+.section-body.open { display: block; }
+
+/* ─── FIELD ─── */
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--text2);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.field-label .req { color: var(--red); }
+.field input, .field select, .field textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  padding: 11px 13px;
+  outline: none;
+  transition: border-color .15s, background .15s;
+  -webkit-appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--accent);
+  background: var(--card);
+}
+.field textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+/* Radio group */
+.radio-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.radio-btn {
+  flex: 1;
+  min-width: 80px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  background: var(--bg);
+  color: var(--text2);
+  user-select: none;
+}
+.radio-btn.selected {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.radio-btn.sel-green { background: var(--green-light); border-color: var(--green); color: var(--green); }
+.radio-btn.sel-red   { background: var(--red-light);   border-color: var(--red);   color: var(--red); }
+.radio-btn.sel-orange{ background: var(--orange-light); border-color: var(--orange); color: var(--orange); }
+
+/* ─── CARGO ITEMS ─── */
+.cargo-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.cargo-item {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  position: relative;
+}
+.cargo-item-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.cargo-num {
+  width: 22px; height: 22px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.cargo-title { font-size: 13px; font-weight: 700; flex: 1; color: var(--text2); }
+.cargo-del {
+  background: none;
+  border: none;
+  color: var(--red);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+/* ─── FUEL ITEMS ─── */
+.fuel-item {
+  background: var(--yellow-light);
+  border: 1.5px solid #fde68a;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.fuel-item-head {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.fuel-badge {
+  background: var(--yellow);
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ─── YO'L PULI ─── */
+.yolpul-item {
+  background: var(--purple-light);
+  border: 1.5px solid #ddd6fe;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+/* ─── ISH HAQI ─── */
+.ishhaqi-item {
+  background: var(--green-light);
+  border: 1.5px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.ishhaqi-item-head {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.ihbadge {
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ─── ADD BUTTON ─── */
+.btn-add-item {
+  width: 100%;
+  background: none;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  color: var(--text2);
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--sans);
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-add-item:hover, .btn-add-item:active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+/* ─── HINT ─── */
+.hint-box {
+  background: var(--accent-light);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--accent);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+/* ─── BOTTOM BAR ─── */
+.bottom-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  gap: 10px;
+  z-index: 50;
+  box-shadow: 0 -4px 16px rgba(0,0,0,.08);
+}
+.btn-export {
+  flex: 1;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--sans);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-export:active { opacity: .88; transform: scale(.98); }
+.btn-telegram {
+  background: #229ed9;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--sans);
+  cursor: pointer;
+}
+.btn-telegram:active { opacity: .88; }
+
+/* ─── PREVIEW MODAL ─── */
+.preview-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+}
+.preview-overlay.open { display: flex; }
+.preview-sheet {
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp .25s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.preview-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+}
+.preview-head h3 { font-size: 16px; font-weight: 700; flex: 1; }
+.preview-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+.preview-close {
+  background: var(--bg);
+  border: none;
+  border-radius: 8px;
+  width: 32px; height: 32px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.json-block {
+  background: #0f172a;
+  color: #7dd3fc;
+  border-radius: 10px;
+  padding: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre;
+  margin-bottom: 12px;
+}
+.copy-btn {
+  width: 100%;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 13px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--sans);
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+.copy-btn:active { opacity: .88; }
+.tg-send-btn {
+  width: 100%;
+  background: #229ed9;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 13px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--sans);
+  cursor: pointer;
+}
+
+/* ─── SAVED INDICATOR ─── */
+.saved-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  display: inline-block;
+  animation: savepulse 2s infinite;
+}
+@keyframes savepulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ─── PAGE DISPLAY ─── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ─── DIVIDER ─── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+/* Summary badge */
+.sum-badge {
+  display: inline-block;
+  background: var(--accent-light);
+  color: var(--accent);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+}
+.sum-badge.green { background: var(--green-light); color: var(--green); }
+.sum-badge.red   { background: var(--red-light); color: var(--red); }
+.sum-badge.orange{ background: var(--orange-light); color: var(--orange); }
+
+/* Nav dots */
+.page-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0 4px;
+}
+.pdot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all .2s;
+}
+.pdot.active { background: var(--accent); width: 18px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="app-header-row">
+    <div class="app-logo">🚛 Reys Hisoboti</div>
+    <div class="app-reys-badge" id="h-reys-num">Reys #–</div>
+    <div class="header-right">
+      <span class="saved-dot" id="saved-dot" style="display:none" title="Avtosaqlandi"></span>
+    </div>
+  </div>
+  <div class="step-tabs" id="step-tabs">
+    <div class="stab active" onclick="goStep(0,this)">📋 Umumiy</div>
+    <div class="stab" onclick="goStep(1,this)">↗ Ketish</div>
+    <div class="stab" onclick="goStep(2,this)">⛽ Yoqilg'i</div>
+    <div class="stab" onclick="goStep(3,this)">📦 Yuklar</div>
+    <div class="stab" onclick="goStep(4,this)">↙ Kelish</div>
+    <div class="stab" onclick="goStep(5,this)">💰 Moliya</div>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ═══════════ PAGE 0: UMUMIY ═══════════ -->
+<div class="page active" id="page-0">
+
+  <div class="section">
+    <div class="section-head open" onclick="toggleSection(this)">
+      <div class="icon" style="background:#eff4ff">📋</div>
+      <div class="stitle">Asosiy Ma'lumotlar</div>
+      <div class="schevron">▼</div>
+    </div>
+    <div class="section-body open">
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">Reys № <span class="req">*</span></div>
+          <input type="number" id="reys-num" placeholder="1" oninput="autoSave();updateHeader()">
+        </div>
+        <div class="field">
+          <div class="field-label">Avto № <span class="req">*</span></div>
+          <input type="text" id="avto-num" placeholder="566" value="566" oninput="autoSave()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">Haydovchi ismi <span class="req">*</span></div>
+          <input type="text" id="haydovchi-ism" placeholder="Begzod" oninput="autoSave()">
+        </div>
+        <div class="field">
+          <div class="field-label">Telefon</div>
+          <input type="tel" id="haydovchi-tel" placeholder="+998..." oninput="autoSave()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">Ketish sanasi <span class="req">*</span></div>
+          <input type="text" id="ketish-sana" placeholder="1,02,2026" oninput="autoSave()">
+        </div>
+        <div class="field">
+          <div class="field-label">Qaytish sanasi</div>
+          <input type="text" id="kelish-sana" placeholder="3,02,2026" oninput="autoSave()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">Ketish shahri</div>
+          <input type="text" id="ketish-shahar" placeholder="Toshkent" oninput="autoSave()">
+        </div>
+        <div class="field">
+          <div class="field-label">Kelish shahri</div>
+          <input type="text" id="kelish-shahar" placeholder="Andijon" oninput="autoSave()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════ PAGE 1: KETISH ═══════════ -->
+<div class="page" id="page-1">
+
+  <div class="hint-box">Ketishda yuk yuklab olgan joy, zakaz bergan kishi va omborxona ma'lumotlarini kiriting</div>
+
+  <div class="section">
+    <div class="section-head open" onclick="toggleSection(this)">
+      <div class="icon" style="background:#eff4ff">↗</div>
+      <div class="stitle">Ketish Ma'lumotlari</div>
+      <div class="schevron">▼</div>
+    </div>
+    <div class="section-body open">
+      <div class="field">
+        <div class="field-label">Zakaz bergan kompaniya/kishi</div>
+        <input type="text" id="k-zakaz-kim" placeholder="Navruztek LLC, Hasan aka..." oninput="autoSave()">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">Shartnoma / Buyurtma №</div>
+          <input type="text" id="k-shartnoma" placeholder="99-659-00-05" oninput="autoSave()">
+        </div>
+        <div class="field">
+          <div class="field-label">Sklad / Ombor</div>
+          <input type="text" id="k-sklad" placeholder="Chilonzor sklad, FAV..." oninput="autoSave()">
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Yuklab olish manzili (to'liq)</div>
+        <input type="text" id="k-manzil-toliq" placeholder="Toshkent, Yunusobod, FAV zavod" oninput="autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">Izoh / Qo'shimcha</div>
+        <textarea id="k-izoh" placeholder="Yuk yetkazib berishda muammo bo'ldi..." oninput="autoSave()"></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════ PAGE 2: YOQILG'I ═══════════ -->
+<div class="page" id="page-2">
+
+  <div class="hint-box">Har bir yoqilg'i to'ldirish uchun alohida yozuv qo'shing</div>
+
+  <div id="fuel-list"></div>
+
+  <button class="btn-add-item" onclick="addFuel()">
+    <span style="font-size:18px">+</span> Yoqilg'i qo'shish
+  </button>
+
+</div>
+
+<!-- ═══════════ PAGE 3: YUKLAR ═══════════ -->
+<div class="page" id="page-3">
+
+  <div class="hint-box">Ketishda va kelishda olingan barcha yuklarni kiriting</div>
+
+  <!-- Ketish yuklari -->
+  <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--accent);margin-bottom:8px;padding:0 2px">↗ Ketish yuklari</div>
+  <div id="ketish-cargo-list"></div>
+  <button class="btn-add-item" style="border-color:#bfdbfe;color:var(--accent)" onclick="addCargo('ketish')">
+    <span style="font-size:18px">+</span> Ketish yuki qo'shish
+  </button>
+
+  <div style="height:16px"></div>
+
+  <!-- Kelish yuklari -->
+  <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--green);margin-bottom:8px;padding:0 2px">↙ Kelish yuklari</div>
+  <div id="kelish-cargo-list"></div>
+  <button class="btn-add-item" style="border-color:#bbf7d0;color:var(--green)" onclick="addCargo('kelish')">
+    <span style="font-size:18px">+</span> Kelish yuki qo'shish
+  </button>
+
+</div>
+
+<!-- ═══════════ PAGE 4: KELISH ═══════════ -->
+<div class="page" id="page-4">
+
+  <div class="hint-box">Qaytishda yuk tushirgan joy va mijoz ma'lumotlarini kiriting</div>
+
+  <div class="section">
+    <div class="section-head open" onclick="toggleSection(this)">
+      <div class="icon" style="background:#f0fdf4">↙</div>
+      <div class="stitle">Kelish Ma'lumotlari</div>
+      <div class="schevron">▼</div>
+    </div>
+    <div class="section-body open">
+      <div class="field">
+        <div class="field-label">Yuk tushirish manzili (to'liq)</div>
+        <input type="text" id="l-manzil-toliq" placeholder="Andijon, Asaka, Turob bozor" oninput="autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">Yuk qabul qilgan kishi</div>
+        <input type="text" id="l-qabul-kim" placeholder="Saidakbar aka, +998..." oninput="autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">Qaytish sababi (erta qaytgan bo'lsa)</div>
+        <input type="text" id="l-sabab" placeholder="Barcha yuklar yetkazildi" oninput="autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">Izoh</div>
+        <textarea id="l-izoh" placeholder="Kelishda muammo yoki eslatmalar..." oninput="autoSave()"></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════ PAGE 5: MOLIYA ═══════════ -->
+<div class="page" id="page-5">
+
+  <div class="hint-box">Yo'l puli, ish haqi va boshqa xarajatlar</div>
+
+  <!-- Yo'l puli -->
+  <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--purple);margin-bottom:8px;padding:0 2px">💳 Yo'l Puli</div>
+  <div id="yolpul-list"></div>
+  <button class="btn-add-item" style="border-color:#ddd6fe;color:var(--purple)" onclick="addYolPul()">
+    <span style="font-size:18px">+</span> Yo'l puli qo'shish
+  </button>
+
+  <div style="height:16px"></div>
+
+  <!-- Ish haqi -->
+  <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--green);margin-bottom:8px;padding:0 2px">💵 Ish Haqi</div>
+  <div id="ishhaqi-list"></div>
+  <button class="btn-add-item" style="border-color:#bbf7d0;color:var(--green)" onclick="addIshHaqi()">
+    <span style="font-size:18px">+</span> Ish haqi qo'shish
+  </button>
+
+  <div style="height:16px"></div>
+
+  <!-- Boshqa xarajatlar -->
+  <div class="section">
+    <div class="section-head open" onclick="toggleSection(this)">
+      <div class="icon" style="background:#fff7ed">📤</div>
+      <div class="stitle">Boshqa Xarajatlar</div>
+      <div class="schevron">▼</div>
+    </div>
+    <div class="section-body open">
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">Ovqatlanish</div>
+          <input type="number" id="fin-ovq" placeholder="0" oninput="autoSave()">
+        </div>
+        <div class="field">
+          <div class="field-label">Remont / Ta'mir</div>
+          <input type="number" id="fin-rem" placeholder="0" oninput="autoSave()">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <div class="field-label">Moyka</div>
+          <input type="number" id="fin-moy" placeholder="0" oninput="autoSave()">
+        </div>
+        <div class="field">
+          <div class="field-label">Boshqa</div>
+          <input type="number" id="fin-boshqa" placeholder="0" oninput="autoSave()">
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Boshqa xarajat izohi</div>
+        <input type="text" id="fin-izoh" placeholder="Nima uchun..." oninput="autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">Topshirilgan summa (kassaga)</div>
+        <input type="number" id="fin-topshir" placeholder="0" oninput="autoSave()">
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</div><!-- /main -->
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <button class="btn-export" onclick="openPreview()">
+    📄 Hisobot Tayyor
+  </button>
+  <button class="btn-telegram" onclick="sendTelegram()" title="Telegram orqali yuborish">✈️</button>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div class="preview-overlay" id="preview-overlay">
+  <div class="preview-sheet">
+    <div class="preview-head">
+      <h3>📄 Hisobot</h3>
+      <button class="preview-close" onclick="closePreview()">✕</button>
+    </div>
+    <div class="preview-body">
+      <div id="preview-text-box" style="background:var(--bg);border-radius:10px;padding:14px;font-size:13px;line-height:1.7;margin-bottom:12px;white-space:pre-wrap;font-family:var(--mono)"></div>
+      <button class="copy-btn" onclick="copyJSON()">📋 Matnni Nusxalash</button>
+      <button class="tg-send-btn" onclick="sendTelegram()">✈️ Telegram orqali Yuborish</button>
+      <div style="height:8px"></div>
+      <button class="copy-btn" style="background:var(--accent)" onclick="copyJSONRaw()">{ } JSON Nusxalash (dashboard uchun)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let fuelCount = 0;
+let yolpulCount = 0;
+let ishHaqiCount = 0;
+let cargoCountK = 0;
+let cargoCountL = 0;
+let currentStep = 0;
+
+// ═══════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════
+function goStep(n, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + n).classList.add('active');
+  btn.classList.add('active');
+  currentStep = n;
+  window.scrollTo(0, 0);
+}
+
+function toggleSection(head) {
+  head.classList.toggle('open');
+  const body = head.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+function updateHeader() {
+  const n = document.getElementById('reys-num').value;
+  document.getElementById('h-reys-num').textContent = n ? `Reys #${n}` : 'Reys #–';
+}
+
+// ═══════════════════════════════
+// FUEL ITEMS
+// ═══════════════════════════════
+function addFuel(data = {}) {
+  const id = ++fuelCount;
+  const container = document.getElementById('fuel-list');
+  const el = document.createElement('div');
+  el.className = 'fuel-item';
+  el.id = `fuel-${id}`;
+  el.innerHTML = `
+    <div class="fuel-item-head">
+      <span class="fuel-badge">⛽ ${id}-yoqilg'i</span>
+      <button class="cargo-del" onclick="document.getElementById('fuel-${id}').remove();autoSave()">×</button>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">Qayerdan (AZS nomi/manzil)</div>
+        <input type="text" placeholder="Lukoil, Andijon..." value="${data.qayer||''}" oninput="autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">Yo'nalish</div>
+        <select onchange="autoSave()">
+          <option ${(data.yonalish||'ketish')==='ketish'?'selected':''}>ketish</option>
+          <option ${(data.yonalish||'')==='kelish'?'selected':''}>kelish</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">Yoqilg'i turi</div>
+      <div class="radio-group" id="fuel-tur-${id}">
+        <div class="radio-btn ${(data.tur||'')==='Evro DT'?'selected':''}" onclick="selectRadio('fuel-tur-${id}',this)">Evro DT</div>
+        <div class="radio-btn ${(data.tur||'')==='Oddiy DT'?'selected':''}" onclick="selectRadio('fuel-tur-${id}',this)">Oddiy DT</div>
+        <div class="radio-btn ${(data.tur||'')==='Benzin'?'selected':''}" onclick="selectRadio('fuel-tur-${id}',this)">Benzin</div>
+        <div class="radio-btn ${(data.tur||'')==='Gaz'?'selected':''}" onclick="selectRadio('fuel-tur-${id}',this)">Gaz</div>
+      </div>
+    </div>
+    <div class="field-row3">
+      <div class="field">
+        <div class="field-label">Litr</div>
+        <input type="number" placeholder="100" value="${data.litr||''}" oninput="calcFuelSum(${id});autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">Narh/L</div>
+        <input type="number" placeholder="8000" value="${data.narh||''}" oninput="calcFuelSum(${id});autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">Jami summa</div>
+        <input type="number" placeholder="auto" id="fuel-sum-${id}" value="${data.summa||''}" oninput="autoSave()">
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">To'lov usuli</div>
+      <div class="radio-group" id="fuel-tolov-${id}">
+        <div class="radio-btn ${(data.tolov||'')==='Naqt'?'selected sel-green':''}" onclick="selectRadio('fuel-tolov-${id}',this);markNaqt(this,'fuel-naqt-${id}')">💵 Naqt</div>
+        <div class="radio-btn ${(data.tolov||'')==='Yozildi'?'selected':''}" onclick="selectRadio('fuel-tolov-${id}',this);markNaqt(this,'fuel-naqt-${id}')">📝 Yozildi</div>
+        <div class="radio-btn ${(data.tolov||'')==='Karta'?'selected':''}" onclick="selectRadio('fuel-tolov-${id}',this);markNaqt(this,'fuel-naqt-${id}')">💳 Karta</div>
+      </div>
+    </div>
+    <div id="fuel-naqt-${id}" style="${(data.tolov||'')==='Naqt'?'':'display:none'}">
+      <div class="field">
+        <div class="field-label" style="color:var(--red)">⚠️ Naqt to'lov — Xarajatga borad</div>
+        <input type="text" placeholder="Kim berdi naqt pulni?" value="${data.naqtKim||''}" oninput="autoSave()">
+      </div>
+    </div>`;
+  container.appendChild(el);
+}
+
+function calcFuelSum(id) {
+  const el = document.getElementById(`fuel-${id}`);
+  if (!el) return;
+  const inputs = el.querySelectorAll('input[type=number]');
+  const litr = parseFloat(inputs[0].value) || 0;
+  const narh = parseFloat(inputs[1].value) || 0;
+  if (litr && narh) document.getElementById(`fuel-sum-${id}`).value = litr * narh;
+}
+
+function markNaqt(btn, showId) {
+  const showEl = document.getElementById(showId);
+  if (!showEl) return;
+  showEl.style.display = btn.textContent.includes('Naqt') ? '' : 'none';
+}
+
+// ═══════════════════════════════
+// CARGO ITEMS
+// ═══════════════════════════════
+function addCargo(dir, data = {}) {
+  const isK = dir === 'ketish';
+  const id = isK ? ++cargoCountK : ++cargoCountL;
+  const container = document.getElementById(`${dir}-cargo-list`);
+  const el = document.createElement('div');
+  el.className = 'cargo-item';
+  el.id = `cargo-${dir}-${id}`;
+  el.innerHTML = `
+    <div class="cargo-item-head">
+      <div class="cargo-num" style="background:${isK?'var(--accent)':'var(--green)'}">${id}</div>
+      <div class="cargo-title">${isK?'Ketish':'Kelish'} Yuki</div>
+      <button class="cargo-del" onclick="document.getElementById('cargo-${dir}-${id}').remove();autoSave()">×</button>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">Yuk nomi <span class="req">*</span></div>
+        <input type="text" placeholder="Супрем, Ип, Мато..." value="${data.yukNomi||''}" oninput="autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">O'lchov birligi</div>
+        <select onchange="autoSave()">
+          <option ${(data.olchov||'')==='kg'?'selected':''}>kg</option>
+          <option ${(data.olchov||'')==='dona'?'selected':''}>dona</option>
+          <option ${(data.olchov||'')==='litr'?'selected':''}>litr</option>
+          <option ${(data.olchov||'')==='tonna'?'selected':''}>tonna</option>
+          <option ${(data.olchov||'')==='qop'?'selected':''}>qop</option>
+          <option ${(data.olchov||'')==='m2'?'selected':''}>m²</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">Kimdan (yuk egasi)</div>
+        <input type="text" placeholder="FAV, Turob bozor..." value="${data.kimdan||''}" oninput="autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">Kimga (yetkazish)</div>
+        <input type="text" placeholder="Mijoz nomi, sklad..." value="${data.kimga||''}" oninput="autoSave()">
+      </div>
+    </div>
+    <div class="field-row3">
+      <div class="field">
+        <div class="field-label">Soni / Miqdori</div>
+        <input type="number" placeholder="1000" value="${data.soni||''}" oninput="calcCargoSum('${dir}',${id});autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">Narhi</div>
+        <input type="number" placeholder="500" value="${data.narh||''}" oninput="calcCargoSum('${dir}',${id});autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">Jami summa</div>
+        <input type="number" placeholder="auto" id="cargo-sum-${dir}-${id}" value="${data.summa||''}" oninput="autoSave()">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">Olingan summa</div>
+        <input type="number" placeholder="0" value="${data.olindi||''}" oninput="autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">Qoldi (avtomatik)</div>
+        <input type="number" placeholder="0" id="cargo-koldi-${dir}-${id}" value="${data.koldi||''}" readonly style="background:#fff0f0;border-color:#fca5a5">
+      </div>
+    </div>`;
+  container.appendChild(el);
+}
+
+function calcCargoSum(dir, id) {
+  const el = document.getElementById(`cargo-${dir}-${id}`);
+  if (!el) return;
+  const inputs = el.querySelectorAll('input[type=number]');
+  const soni = parseFloat(inputs[0].value) || 0;
+  const narh = parseFloat(inputs[1].value) || 0;
+  const summa = soni * narh;
+  if (soni && narh) document.getElementById(`cargo-sum-${dir}-${id}`).value = summa;
+  // calc koldi
+  const olindi = parseFloat(inputs[3].value) || 0;
+  const curSumma = parseFloat(document.getElementById(`cargo-sum-${dir}-${id}`).value) || 0;
+  document.getElementById(`cargo-koldi-${dir}-${id}`).value = Math.max(0, curSumma - olindi);
+}
+
+// ═══════════════════════════════
+// YO'L PULI
+// ═══════════════════════════════
+function addYolPul(data = {}) {
+  const id = ++yolpulCount;
+  const container = document.getElementById('yolpul-list');
+  const el = document.createElement('div');
+  el.className = 'yolpul-item';
+  el.id = `yolpul-${id}`;
+  el.innerHTML = `
+    <div class="cargo-item-head">
+      <div class="cargo-num" style="background:var(--purple)">${id}</div>
+      <div class="cargo-title">Yo'l Puli</div>
+      <button class="cargo-del" onclick="document.getElementById('yolpul-${id}').remove();autoSave()">×</button>
+    </div>
+    <div class="field">
+      <div class="field-label">Qayerdan olindi (shaxs / kassa)</div>
+      <input type="text" placeholder="Mansurbek, Asosiy kassa..." value="${data.kimdan||''}" oninput="autoSave()">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">Pul turi</div>
+        <div class="radio-group" id="yp-pul-tur-${id}">
+          <div class="radio-btn ${(data.pulTur||'')==="So'm"?'selected':''}" onclick="selectRadio('yp-pul-tur-${id}',this)">So'm</div>
+          <div class="radio-btn ${(data.pulTur||'')==='Dollar'?'selected':''}" onclick="selectRadio('yp-pul-tur-${id}',this)">Dollar</div>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Miqdori</div>
+        <input type="number" placeholder="600000" value="${data.miqdor||''}" oninput="autoSave()">
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">Maqsad / Sabab</div>
+      <input type="text" placeholder="Yoqilg'i, ovqat, boshqa..." value="${data.maqsad||''}" oninput="autoSave()">
+    </div>`;
+  container.appendChild(el);
+}
+
+// ═══════════════════════════════
+// ISH HAQI
+// ═══════════════════════════════
+function addIshHaqi(data = {}) {
+  const id = ++ishHaqiCount;
+  const container = document.getElementById('ishhaqi-list');
+  const el = document.createElement('div');
+  el.className = 'ishhaqi-item';
+  el.id = `ih-${id}`;
+  el.innerHTML = `
+    <div class="ishhaqi-item-head">
+      <div class="cargo-num" style="background:var(--green)">${id}</div>
+      <div class="cargo-title">Ish Haqi To'lovi</div>
+      <button class="cargo-del" onclick="document.getElementById('ih-${id}').remove();autoSave()">×</button>
+    </div>
+    <div class="field">
+      <div class="field-label">Ish haqi turi</div>
+      <div class="radio-group" id="ih-tur-${id}">
+        <div class="radio-btn ${(data.tur||'')==='Shu reys'?'selected sel-green':''}" onclick="selectRadio('ih-tur-${id}',this)">✅ Shu reys</div>
+        <div class="radio-btn ${(data.tur||'')==='Oldingi reys'?'selected sel-orange':''}" onclick="selectRadio('ih-tur-${id}',this)">⬅️ Oldingi</div>
+        <div class="radio-btn ${(data.tur||'')==='Avans'?'selected':''}" onclick="selectRadio('ih-tur-${id}',this)">💳 Avans</div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <div class="field-label">Miqdori (so'm)</div>
+        <input type="number" placeholder="600000" value="${data.miqdor||''}" oninput="autoSave()">
+      </div>
+      <div class="field">
+        <div class="field-label">Kimdan olindi</div>
+        <input type="text" placeholder="Mansurbek, kassa..." value="${data.kimdan||''}" oninput="autoSave()">
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">Izoh</div>
+      <input type="text" placeholder="Qaysi reys uchun, sabab..." value="${data.izoh||''}" oninput="autoSave()">
+    </div>`;
+  container.appendChild(el);
+}
+
+// ═══════════════════════════════
+// RADIO SELECT
+// ═══════════════════════════════
+function selectRadio(groupId, btn) {
+  document.querySelectorAll(`#${groupId} .radio-btn`).forEach(b => {
+    b.classList.remove('selected', 'sel-green', 'sel-red', 'sel-orange');
+  });
+  btn.classList.add('selected');
+  if (btn.textContent.includes('Naqt') || btn.textContent.includes('✅')) btn.classList.add('sel-green');
+  if (btn.textContent.includes('⬅️')) btn.classList.add('sel-orange');
+  autoSave();
+}
+
+// ═══════════════════════════════
+// DATA COLLECTION
+// ═══════════════════════════════
+function getRadio(groupId) {
+  const sel = document.querySelector(`#${groupId} .selected`);
+  return sel ? sel.textContent.trim() : '';
+}
+
+function collectData() {
+  // Fuel
+  const fuelArr = [];
+  document.querySelectorAll('.fuel-item').forEach(el => {
+    const inputs = el.querySelectorAll('input');
+    const selects = el.querySelectorAll('select');
+    const id = el.id.split('-')[1];
+    fuelArr.push({
+      qayer:    inputs[0]?.value || '',
+      yonalish: selects[0]?.value || 'ketish',
+      tur:      getRadio(`fuel-tur-${id}`),
+      litr:     parseFloat(inputs[1]?.value) || 0,
+      narh:     parseFloat(inputs[2]?.value) || 0,
+      summa:    parseFloat(inputs[3]?.value) || 0,
+      tolov:    getRadio(`fuel-tolov-${id}`),
+      naqtKim:  inputs[4]?.value || '',
+    });
+  });
+
+  // Cargo ketish
+  const ketishCargo = [];
+  document.querySelectorAll('#ketish-cargo-list .cargo-item').forEach(el => {
+    const inputs = el.querySelectorAll('input');
+    const selects = el.querySelectorAll('select');
+    ketishCargo.push({
+      yukNomi: inputs[0]?.value || '',
+      olchov:  selects[0]?.value || 'kg',
+      kimdan:  inputs[1]?.value || '',
+      kimga:   inputs[2]?.value || '',
+      soni:    parseFloat(inputs[3]?.value) || 0,
+      narh:    parseFloat(inputs[4]?.value) || 0,
+      summa:   parseFloat(inputs[5]?.value) || 0,
+      olindi:  parseFloat(inputs[6]?.value) || 0,
+      koldi:   parseFloat(inputs[7]?.value) || 0,
+    });
+  });
+
+  // Cargo kelish
+  const kelishCargo = [];
+  document.querySelectorAll('#kelish-cargo-list .cargo-item').forEach(el => {
+    const inputs = el.querySelectorAll('input');
+    const selects = el.querySelectorAll('select');
+    kelishCargo.push({
+      yukNomi: inputs[0]?.value || '',
+      olchov:  selects[0]?.value || 'kg',
+      kimdan:  inputs[1]?.value || '',
+      kimga:   inputs[2]?.value || '',
+      soni:    parseFloat(inputs[3]?.value) || 0,
+      narh:    parseFloat(inputs[4]?.value) || 0,
+      summa:   parseFloat(inputs[5]?.value) || 0,
+      olindi:  parseFloat(inputs[6]?.value) || 0,
+      koldi:   parseFloat(inputs[7]?.value) || 0,
+    });
+  });
+
+  // Yo'l puli
+  const yolPulArr = [];
+  document.querySelectorAll('.yolpul-item').forEach(el => {
+    const inputs = el.querySelectorAll('input');
+    const id = el.id.split('-')[1];
+    yolPulArr.push({
+      kimdan:  inputs[0]?.value || '',
+      pulTur:  getRadio(`yp-pul-tur-${id}`),
+      miqdor:  parseFloat(inputs[1]?.value) || 0,
+      maqsad:  inputs[2]?.value || '',
+    });
+  });
+
+  // Ish haqi
+  const ishHaqiArr = [];
+  document.querySelectorAll('.ishhaqi-item').forEach(el => {
+    const inputs = el.querySelectorAll('input');
+    const id = el.id.split('-')[1];
+    ishHaqiArr.push({
+      tur:    getRadio(`ih-tur-${id}`),
+      miqdor: parseFloat(inputs[0]?.value) || 0,
+      kimdan: inputs[1]?.value || '',
+      izoh:   inputs[2]?.value || '',
+    });
+  });
+
+  return {
+    meta: {
+      versiya:    '2.0',
+      reysNum:    parseInt(document.getElementById('reys-num').value) || 0,
+      avtoNum:    document.getElementById('avto-num').value || '566',
+      haydovchi:  document.getElementById('haydovchi-ism').value || '',
+      tel:        document.getElementById('haydovchi-tel').value || '',
+      ketishSana: document.getElementById('ketish-sana').value || '',
+      kelishSana: document.getElementById('kelish-sana').value || '',
+      ketishShahar: document.getElementById('ketish-shahar').value || '',
+      kelishShahar: document.getElementById('kelish-shahar').value || '',
+      exportVaqt: new Date().toLocaleString('uz-UZ'),
+    },
+    ketishDetail: {
+      zakazKim:    document.getElementById('k-zakaz-kim').value || '',
+      shartnoma:   document.getElementById('k-shartnoma').value || '',
+      sklad:       document.getElementById('k-sklad').value || '',
+      manzilToliq: document.getElementById('k-manzil-toliq').value || '',
+      izoh:        document.getElementById('k-izoh').value || '',
+    },
+    kelishDetail: {
+      manzilToliq: document.getElementById('l-manzil-toliq').value || '',
+      qabulKim:    document.getElementById('l-qabul-kim').value || '',
+      sabab:       document.getElementById('l-sabab').value || '',
+      izoh:        document.getElementById('l-izoh').value || '',
+    },
+    yoqilgi: fuelArr,
+    ketishCargo,
+    kelishCargo,
+    yolPul: yolPulArr,
+    ishHaqi: ishHaqiArr,
+    boshqaXarajat: {
+      ovqatlanish: parseFloat(document.getElementById('fin-ovq').value) || 0,
+      remont:      parseFloat(document.getElementById('fin-rem').value) || 0,
+      moyka:       parseFloat(document.getElementById('fin-moy').value) || 0,
+      boshqa:      parseFloat(document.getElementById('fin-boshqa').value) || 0,
+      izoh:        document.getElementById('fin-izoh').value || '',
+      topshirilgan: parseFloat(document.getElementById('fin-topshir').value) || 0,
+    }
+  };
+}
+
+// ═══════════════════════════════
+// HUMAN-READABLE REPORT
+// ═══════════════════════════════
+function fmt(n) { return (n||0).toLocaleString('uz-UZ'); }
+
+function buildReport(d) {
+  const m = d.meta;
+  let lines = [];
+  lines.push(`🚛 REYS HISOBOTI`);
+  lines.push(`━━━━━━━━━━━━━━━━━`);
+  lines.push(`📌 Reys: #${m.reysNum}  |  Avto: ${m.avtoNum}`);
+  lines.push(`👤 Haydovchi: ${m.haydovchi}  ${m.tel}`);
+  lines.push(`📅 Ketish: ${m.ketishSana}  →  Kelish: ${m.kelishSana}`);
+  lines.push(`🗺 ${m.ketishShahar} → ${m.kelishShahar}`);
+  lines.push(``);
+
+  // Ketish
+  if (d.ketishDetail.zakazKim || d.ketishDetail.sklad) {
+    lines.push(`↗ KETISH MA'LUMOTLARI`);
+    if (d.ketishDetail.zakazKim)    lines.push(`  📋 Zakaz: ${d.ketishDetail.zakazKim}`);
+    if (d.ketishDetail.shartnoma)   lines.push(`  🔖 Shartnoma: ${d.ketishDetail.shartnoma}`);
+    if (d.ketishDetail.sklad)       lines.push(`  🏭 Sklad: ${d.ketishDetail.sklad}`);
+    if (d.ketishDetail.manzilToliq) lines.push(`  📍 Manzil: ${d.ketishDetail.manzilToliq}`);
+    if (d.ketishDetail.izoh)        lines.push(`  💬 Izoh: ${d.ketishDetail.izoh}`);
+    lines.push(``);
+  }
+
+  // Yoqilg'i
+  if (d.yoqilgi.length) {
+    lines.push(`⛽ YOQILG'I`);
+    d.yoqilgi.forEach((f, i) => {
+      lines.push(`  ${i+1}. ${f.qayer} (${f.yonalish})`);
+      lines.push(`     Tur: ${f.tur}  |  ${f.litr}L × ${fmt(f.narh)} = ${fmt(f.summa)}`);
+      lines.push(`     To'lov: ${f.tolov}${f.naqtKim?' ('+f.naqtKim+')':''}`);
+    });
+    const jLitr = d.yoqilgi.reduce((s,f)=>s+f.litr,0);
+    const jSum  = d.yoqilgi.reduce((s,f)=>s+f.summa,0);
+    lines.push(`  📊 Jami: ${jLitr}L = ${fmt(jSum)} so'm`);
+    lines.push(``);
+  }
+
+  // Ketish yuklari
+  if (d.ketishCargo.length) {
+    lines.push(`📦 KETISH YUKLARI`);
+    d.ketishCargo.forEach((c, i) => {
+      lines.push(`  ${i+1}. ${c.yukNomi}`);
+      lines.push(`     ${c.kimdan} → ${c.kimga}`);
+      lines.push(`     ${c.soni} ${c.olchov} × ${fmt(c.narh)} = ${fmt(c.summa)}`);
+      lines.push(`     Olindi: ${fmt(c.olindi)}  |  Qoldi: ${fmt(c.koldi)}`);
+    });
+    lines.push(``);
+  }
+
+  // Kelish yuklari
+  if (d.kelishCargo.length) {
+    lines.push(`📦 KELISH YUKLARI`);
+    d.kelishCargo.forEach((c, i) => {
+      lines.push(`  ${i+1}. ${c.yukNomi}`);
+      lines.push(`     ${c.kimdan} → ${c.kimga}`);
+      lines.push(`     ${c.soni} ${c.olchov} × ${fmt(c.narh)} = ${fmt(c.summa)}`);
+      lines.push(`     Olindi: ${fmt(c.olindi)}  |  Qoldi: ${fmt(c.koldi)}`);
+    });
+    lines.push(``);
+  }
+
+  // Kelish detail
+  if (d.kelishDetail.manzilToliq || d.kelishDetail.qabulKim) {
+    lines.push(`↙ KELISH MA'LUMOTLARI`);
+    if (d.kelishDetail.manzilToliq) lines.push(`  📍 Manzil: ${d.kelishDetail.manzilToliq}`);
+    if (d.kelishDetail.qabulKim)    lines.push(`  👤 Qabul qildi: ${d.kelishDetail.qabulKim}`);
+    if (d.kelishDetail.sabab)       lines.push(`  💬 Sabab: ${d.kelishDetail.sabab}`);
+    if (d.kelishDetail.izoh)        lines.push(`  💬 Izoh: ${d.kelishDetail.izoh}`);
+    lines.push(``);
+  }
+
+  // Yo'l puli
+  if (d.yolPul.length) {
+    lines.push(`💳 YO'L PULI`);
+    d.yolPul.forEach((y, i) => {
+      lines.push(`  ${i+1}. ${y.kimdan} → ${fmt(y.miqdor)} ${y.pulTur}`);
+      if (y.maqsad) lines.push(`     Maqsad: ${y.maqsad}`);
+    });
+    lines.push(``);
+  }
+
+  // Ish haqi
+  if (d.ishHaqi.length) {
+    lines.push(`💵 ISH HAQI`);
+    d.ishHaqi.forEach((ih, i) => {
+      lines.push(`  ${i+1}. ${fmt(ih.miqdor)} so'm  (${ih.tur})`);
+      if (ih.kimdan) lines.push(`     Kimdan: ${ih.kimdan}`);
+      if (ih.izoh)   lines.push(`     Izoh: ${ih.izoh}`);
+    });
+    lines.push(``);
+  }
+
+  // Moliya
+  const bx = d.boshqaXarajat;
+  const xarJami = bx.ovqatlanish + bx.remont + bx.moyka + bx.boshqa;
+  const yoqSum = d.yoqilgi.reduce((s,f)=>s+f.summa,0);
+  const ihJami = d.ishHaqi.reduce((s,ih)=>s+ih.miqdor,0);
+  const kKoldi = [...d.ketishCargo,...d.kelishCargo].reduce((s,c)=>s+c.koldi,0);
+  lines.push(`💰 MOLIYAVIY XULOSA`);
+  lines.push(`  Yuk daromad: ${fmt([...d.ketishCargo,...d.kelishCargo].reduce((s,c)=>s+c.summa,0))}`);
+  lines.push(`  Qarzdorlik: ${fmt(kKoldi)}`);
+  lines.push(`  Yoqilg'i: ${fmt(yoqSum)}`);
+  lines.push(`  Ish haqi: ${fmt(ihJami)}`);
+  if (bx.ovqatlanish) lines.push(`  Ovqatlanish: ${fmt(bx.ovqatlanish)}`);
+  if (bx.remont)      lines.push(`  Remont: ${fmt(bx.remont)}`);
+  if (bx.moyka)       lines.push(`  Moyka: ${fmt(bx.moyka)}`);
+  if (bx.topshirilgan) lines.push(`  Kassaga topshirildi: ${fmt(bx.topshirilgan)}`);
+  lines.push(``);
+  lines.push(`⏰ ${m.exportVaqt}`);
+  lines.push(`#reys${m.reysNum} #${m.avtoNum}`);
+
+  return lines.join('\n');
+}
+
+// ═══════════════════════════════
+// PREVIEW / EXPORT
+// ═══════════════════════════════
+function openPreview() {
+  const d = collectData();
+  const report = buildReport(d);
+  document.getElementById('preview-text-box').textContent = report;
+  window._lastJSON = JSON.stringify(d, null, 2);
+  window._lastReport = report;
+  document.getElementById('preview-overlay').classList.add('open');
+}
+function closePreview() {
+  document.getElementById('preview-overlay').classList.remove('open');
+}
+
+function copyJSON() {
+  const text = window._lastReport || '';
+  navigator.clipboard.writeText(text).then(() => {
+    alert('✅ Nusxalandi! Telegramga joylashtiring.');
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('✅ Nusxalandi!');
+  });
+}
+
+function copyJSONRaw() {
+  const text = window._lastJSON || '{}';
+  navigator.clipboard.writeText(text).then(() => {
+    alert('✅ JSON nusxalandi! Dashboardga import qilishingiz mumkin.');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('✅ Nusxalandi!');
+  });
+}
+
+function sendTelegram() {
+  const d = collectData();
+  const report = buildReport(d);
+  const encoded = encodeURIComponent(report);
+  // Share via Telegram — opens share dialog
+  const tgUrl = `https://t.me/share/url?url=.&text=${encoded}`;
+  window.open(tgUrl, '_blank');
+}
+
+// ═══════════════════════════════
+// AUTO SAVE (localStorage)
+// ═══════════════════════════════
+let saveTimer = null;
+function autoSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      const d = collectData();
+      localStorage.setItem('haydovchi_draft', JSON.stringify(d));
+      document.getElementById('saved-dot').style.display = '';
+    } catch(e) {}
+  }, 600);
+}
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem('haydovchi_draft');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    const m = d.meta || {};
+
+    const set = (id, val) => { const el=document.getElementById(id); if(el&&val!==undefined) el.value=val||''; };
+    set('reys-num', m.reysNum);
+    set('avto-num', m.avtoNum);
+    set('haydovchi-ism', m.haydovchi);
+    set('haydovchi-tel', m.tel);
+    set('ketish-sana', m.ketishSana);
+    set('kelish-sana', m.kelishSana);
+    set('ketish-shahar', m.ketishShahar);
+    set('kelish-shahar', m.kelishShahar);
+
+    const kd = d.ketishDetail || {};
+    set('k-zakaz-kim', kd.zakazKim); set('k-shartnoma', kd.shartnoma);
+    set('k-sklad', kd.sklad); set('k-manzil-toliq', kd.manzilToliq); set('k-izoh', kd.izoh);
+
+    const ld = d.kelishDetail || {};
+    set('l-manzil-toliq', ld.manzilToliq); set('l-qabul-kim', ld.qabulKim);
+    set('l-sabab', ld.sabab); set('l-izoh', ld.izoh);
+
+    (d.yoqilgi||[]).forEach(f => addFuel(f));
+    (d.ketishCargo||[]).forEach(c => addCargo('ketish', c));
+    (d.kelishCargo||[]).forEach(c => addCargo('kelish', c));
+    (d.yolPul||[]).forEach(y => addYolPul(y));
+    (d.ishHaqi||[]).forEach(ih => addIshHaqi(ih));
+
+    const bx = d.boshqaXarajat || {};
+    set('fin-ovq', bx.ovqatlanish); set('fin-rem', bx.remont);
+    set('fin-moy', bx.moyka); set('fin-boshqa', bx.boshqa);
+    set('fin-izoh', bx.izoh); set('fin-topshir', bx.topshirilgan);
+
+    updateHeader();
+    document.getElementById('saved-dot').style.display = '';
+  } catch(e) { console.log('Draft load error:', e); }
+}
+
+// New reys button clears draft
+function yangiReys() {
+  if (confirm('Yangi reys boshlaysizmi? Hozirgi ma\'lumotlar o\'chadi.')) {
+    localStorage.removeItem('haydovchi_draft');
+    location.reload();
+  }
+}
+
+// ═══════════════════════════════
+// INIT
+// ═══════════════════════════════
+window.onload = () => {
+  loadDraft();
+  // Add new reys button to header
+  const hr = document.querySelector('.header-right');
+  const btn = document.createElement('button');
+  btn.textContent = '+ Yangi';
+  btn.style.cssText = 'background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;font-family:var(--sans);cursor:pointer';
+  btn.onclick = yangiReys;
+  hr.appendChild(btn);
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yuk Tashish — 566</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --bg:#0d0f18;--surface:#141720;--surface2:#1c2030;--surface3:#222640;
+  --border:#262c42;--border2:#303758;
+  --accent:#5b8def;--accent2:#f0a045;--green:#3ecf8e;--red:#f05c5c;
+  --yellow:#f5d142;--purple:#a78bfa;--cyan:#38bdf8;
+  --text:#dde3f4;--text2:#7880a0;--text3:#4a5070;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;font-size:14px}
+
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:12px;height:52px;position:sticky;top:0;z-index:100}
+.logo{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--accent)}
+.auto-badge{background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.sync-pill{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;font-family:var(--mono);color:var(--text2)}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--text3);transition:all .3s}
+.sdot.ok{background:var(--green);box-shadow:0 0 8px var(--green)}
+.sdot.err{background:var(--red)}
+.sdot.spin{background:var(--yellow);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.btn-topbar{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;transition:border-color .2s}
+.btn-topbar:hover{border-color:var(--accent)}
+
+/* SETUP */
+#setup{max-width:520px;margin:80px auto;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:36px}
+#setup h2{font-size:20px;font-weight:700;margin-bottom:6px}
+#setup .sub{color:var(--text2);font-size:13px;margin-bottom:28px;line-height:1.6}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text2);margin-bottom:6px}
+.field input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 14px;border-radius:7px;outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--accent)}
+.field .hint{font-size:11px;color:var(--text2);margin-top:5px}
+.field .hint a{color:var(--accent)}
+.btn-main{width:100%;background:var(--accent);color:#fff;border:none;padding:12px;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;transition:opacity .2s;margin-top:4px}
+.btn-main:hover{opacity:.88}
+.btn-alt{width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:10px;border-radius:7px;font-size:13px;cursor:pointer;transition:background .2s}
+.btn-alt:hover{background:var(--border)}
+.err{color:var(--red);font-size:12px;margin-top:8px;display:none}
+.divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:500}
+.loader{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading p{color:var(--text2);font-family:var(--mono);font-size:13px}
+
+/* LAYOUT */
+#app{display:none}
+.layout{display:flex;height:calc(100vh - 52px);overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:240px;min-width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column}
+.sb-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sb-head span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text2)}
+.btn-add{background:var(--accent);color:#fff;border:none;padding:4px 12px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer}
+.rlist{flex:1;overflow-y:auto;padding:8px}
+.ri{padding:10px 12px;border-radius:8px;cursor:pointer;border:1px solid transparent;margin-bottom:3px;transition:all .15s}
+.ri:hover{background:var(--surface2);border-color:var(--border)}
+.ri.active{background:var(--surface2);border-color:var(--accent)}
+.ri .rn{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent)}
+.ri .rd{font-size:11px;color:var(--text2);margin-top:2px}
+.ri .rv{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:2px}
+.sbadge{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-family:var(--mono);font-weight:600}
+.s-ok{background:#0d2a1a;color:var(--green);border:1px solid #1a4a30}
+.s-go{background:#2a2a0d;color:var(--yellow);border:1px solid #4a4a1a}
+.s-wr{background:#2a0d0d;color:var(--red);border:1px solid #4a1a1a}
+
+/* NAV TABS */
+.nav-tabs{display:flex;gap:2px;background:var(--surface);padding:0 20px;border-bottom:1px solid var(--border)}
+.ntab{padding:13px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--text2);border:none;background:transparent;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.ntab:hover{color:var(--text)}
+.ntab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.page{display:none;padding:20px;flex:1}
+.page.active{display:block}
+
+/* CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.c-blue::before{background:var(--accent)}
+.kpi.c-green::before{background:var(--green)}
+.kpi.c-red::before{background:var(--red)}
+.kpi.c-yellow::before{background:var(--yellow)}
+.kpi.c-purple::before{background:var(--purple)}
+.kpi.c-cyan::before{background:var(--cyan)}
+.kpi .kl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:8px}
+.kpi .kv{font-family:var(--mono);font-size:20px;font-weight:600}
+.kpi .ks{font-size:11px;color:var(--text2);margin-top:4px;font-family:var(--mono)}
+.kv.c-blue{color:var(--accent)}
+.kv.c-green{color:var(--green)}
+.kv.c-red{color:var(--red)}
+.kv.c-yellow{color:var(--yellow)}
+.kv.c-purple{color:var(--purple)}
+.kv.c-cyan{color:var(--cyan)}
+
+/* SECTION */
+.sec-title{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;color:var(--text)}
+.sec-title .cnt{font-size:12px;color:var(--text2);font-weight:400;font-family:var(--mono)}
+
+/* TABLE */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.card-head{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--surface2);color:var(--text2);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid var(--border2);font-family:var(--mono);font-size:12px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.tf-sum{color:var(--green);font-weight:600}
+.tf-red{color:var(--red)}
+.tf-yellow{color:var(--yellow)}
+.tf-blue{color:var(--accent)}
+.tf-purple{color:var(--purple)}
+
+/* PROGRESS BAR */
+.pbar{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:6px}
+.pbar-fill{height:100%;border-radius:3px;transition:width .5s}
+
+/* CHARTS (pure CSS bars) */
+.bar-chart{display:flex;flex-direction:column;gap:10px;padding:4px 0}
+.bc-row{display:flex;align-items:center;gap:10px}
+.bc-label{font-size:12px;color:var(--text2);width:80px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--mono)}
+.bc-bar-wrap{flex:1;background:var(--surface2);border-radius:3px;height:22px;position:relative;overflow:hidden}
+.bc-bar{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.bc-val{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--mono);font-size:11px;font-weight:600;color:#fff}
+
+/* 2-col grid */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:0;
+  width:700px;max-width:96vw;
+  height:88vh;max-height:88vh;
+  display:flex;flex-direction:column;
+  position:relative;
+  overflow:hidden;
+  /* Resize handle (bottom-right) */
+  resize:both;
+  min-width:420px;min-height:400px;
+}
+.modal-header{
+  display:flex;align-items:center;gap:10px;
+  padding:16px 20px 12px;
+  border-bottom:1px solid var(--border);
+  cursor:move;
+  user-select:none;
+  flex-shrink:0;
+  background:var(--surface);
+  border-radius:12px 12px 0 0;
+}
+.modal-header h3{font-size:16px;font-weight:700;flex:1;margin:0}
+.modal-resize-hint{font-size:10px;color:var(--text3);font-family:var(--mono);white-space:nowrap}
+.modal-body{flex:1;overflow-y:auto;padding:16px 20px}
+.modal-corner{
+  position:absolute;bottom:0;right:0;
+  width:18px;height:18px;
+  cursor:se-resize;
+  display:flex;align-items:flex-end;justify-content:flex-end;
+  padding:3px;
+  color:var(--text3);
+  font-size:12px;
+  line-height:1;
+  border-radius:0 0 12px 0;
+}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fgrp{display:flex;flex-direction:column;gap:5px}
+.fgrp.full{grid-column:1/-1}
+.fgrp label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2)}
+.fgrp input,.fgrp select{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:6px;font-family:var(--mono);font-size:12px;outline:none}
+.fgrp input:focus,.fgrp select:focus{border-color:var(--accent)}
+.trip-block{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px}
+.trip-block-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.cargo-hdr{display:grid;grid-template-columns:2fr 2fr 2fr 1fr 1fr 1.5fr 1.5fr 28px;gap:5px;font-size:10px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.3px;padding:0 4px;margin-bottom:5px}
+.crow{display:grid;grid-template-columns:2fr 2fr 2fr 1fr 1fr 1.5fr 1.5fr 28px;gap:5px;margin-bottom:5px;align-items:center}
+.crow input{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:5px;font-family:var(--mono);font-size:11px;width:100%;outline:none}
+.crow input:focus{border-color:var(--accent)}
+.btn-rmv{background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:0;line-height:1}
+.btn-addrow{background:none;border:1px dashed var(--border);color:var(--text2);padding:6px;border-radius:5px;cursor:pointer;width:100%;font-size:12px;transition:all .15s;margin-bottom:12px}
+.btn-addrow:hover{border-color:var(--accent);color:var(--accent)}
+.mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;border-top:1px solid var(--border);padding-top:16px}
+.btn-save{background:var(--green);color:#000;border:none;padding:9px 22px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer}
+.btn-cancel{background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:9px 18px;border-radius:6px;font-size:13px;cursor:pointer}
+
+/* DETAIL PAGE */
+.dhead{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.dhead h2{font-size:18px;font-weight:700}
+.status-badge{padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;font-family:var(--mono)}
+.trip-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:850px){.trip-pair{grid-template-columns:1fr}}
+.trip-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.tc-head{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.dir-label{font-size:12px;font-weight:700;padding:2px 10px;border-radius:4px;font-family:var(--mono)}
+.dl-k{background:#0d1e38;color:var(--accent);border:1px solid #1a3060}
+.dl-l{background:#0d2818;color:var(--green);border:1px solid #1a4830}
+.tc-meta{display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:1px solid var(--border)}
+.tm{padding:8px 14px;border-right:1px solid var(--border)}
+.tm:nth-child(2n){border-right:none}
+.tm .mk{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.tm .mv{font-family:var(--mono);font-size:12px}
+
+/* NOTICE */
+.notice{background:#1a2010;border:1px solid #2a3818;border-radius:6px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#a8d060;display:flex;gap:6px;align-items:flex-start}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* KASSA PAGE */
+.kassa-table{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.kassa-row{display:grid;grid-template-columns:120px 1fr 1fr 1fr 1fr 1fr;border-bottom:1px solid var(--border2);transition:background .1s}
+.kassa-row:hover{background:var(--surface2)}
+.kassa-row:last-child{border-bottom:none}
+.kassa-row.head{background:var(--surface2);border-bottom:1px solid var(--border)}
+.kr-cell{padding:10px 12px;font-family:var(--mono);font-size:12px}
+.kr-cell.lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2)}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px;color:var(--text2);font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="loader"></div>
+  <p id="lmsg">Yuklanmoqda...</p>
+</div>
+
+<!-- SETUP -->
+<div id="setup" style="display:none">
+  <h2>🚛 Yuk Hisobi — Sozlash</h2>
+  <p class="sub">Ma'lumotlar Yandex Disk'dagi Excel faylingizdan olinadi. Boshqa kompyuterdan ham bir xil ko'rinadi.</p>
+  <div class="field">
+    <label>Yandex Disk OAuth Token</label>
+    <input type="password" id="yd-token" placeholder="y0_AgAA...">
+    <div class="hint">Token olish: <a href="https://oauth.yandex.com/authorize?response_type=token&client_id=122817788c224c9294b2cac65b59e65f" target="_blank">bu havolaga</a> kiring → tokenni nusxa oling</div>
+  </div>
+  <div class="field">
+    <label>Fayl yo'li (Yandex Disk)</label>
+    <input type="text" id="yd-path" value="disk:/566.xlsx" placeholder="disk:/Hujjatlar/566.xlsx">
+  </div>
+  <button class="btn-main" onclick="connectYD()">🔗 Ulash va Yuklash</button>
+  <div class="err" id="setup-err"></div>
+  <hr class="divider">
+  <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Yoki kompyuterdan yuklang:</p>
+  <input type="file" id="local-file" accept=".xlsx" style="display:none" onchange="loadLocal(event)">
+  <button class="btn-alt" onclick="document.getElementById('local-file').click()">📂 Excel Fayl Yuklash</button>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar" id="topbar" style="display:none">
+  <div class="logo">🚛 YUK HISOBI</div>
+  <div class="auto-badge" id="auto-badge">566</div>
+  <div class="topbar-right">
+    <div class="sync-pill"><div class="sdot" id="sdot"></div><span id="slabel">–</span></div>
+    <input type="file" id="topbar-file" accept=".xlsx" style="display:none" onchange="loadLocal(event)">
+    <button class="btn-topbar" onclick="document.getElementById('topbar-file').click()" title="Excel fayl yuklash" style="color:var(--green);border-color:rgba(62,207,142,.3)">📂 Excel</button>
+    <button class="btn-topbar" onclick="openImportJSON()" title="Haydovchi hisobotini import qilish" style="color:var(--cyan);border-color:rgba(56,189,248,.3)">📥 Import</button>
+    <button class="btn-topbar" id="btn-save-yd" onclick="saveToYD()" style="display:none">💾 Saqlash</button>
+    <button class="btn-topbar" onclick="showSettings()">⚙️</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+<!-- JSON IMPORT MODAL -->
+<div class="overlay" id="import-modal" style="z-index:300">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;width:90%;max-width:500px;max-height:90vh;overflow-y:auto">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:6px">📥 Haydovchi Hisobotini Yuklash</h3>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:16px">Haydovchi ilovasidan JSON nusxalang va pastga joylashtiring, yoki faylni yuklang</p>
+    <textarea id="import-json-text" placeholder='{"meta":{"reysNum":1,...}}'
+      style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:10px;border-radius:8px;outline:none;resize:vertical;min-height:140px;margin-bottom:10px"></textarea>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input type="file" id="import-json-file" accept=".json,.txt" style="display:none" onchange="loadImportFile(event)">
+      <button class="btn-topbar" style="flex:1;padding:10px" onclick="document.getElementById('import-json-file').click()">📂 JSON fayl yuklash</button>
+    </div>
+    <div id="import-preview" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px;line-height:1.6"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn-cancel" onclick="document.getElementById('import-modal').classList.remove('open')">Bekor</button>
+      <button onclick="previewImport()" style="background:var(--accent);color:#fff;border:none;padding:9px 18px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">👁 Ko'rish</button>
+      <button onclick="confirmImport()" style="background:var(--green);color:#000;border:none;padding:9px 18px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">✅ Import</button>
+    </div>
+  </div>
+</div>
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-head">
+        <span>Reyslar</span>
+        <button class="btn-add" onclick="openAdd()">+ Reys</button>
+      </div>
+      <div class="rlist" id="rlist"></div>
+    </div>
+
+    <!-- MAIN -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+      <div class="nav-tabs">
+        <button class="ntab active" onclick="showPage('dash',this)">📊 Dashboard</button>
+        <button class="ntab" onclick="showPage('reys',this)">🗂️ Reys</button>
+        <button class="ntab" onclick="showPage('ishchi',this)">👷 Ishchilar</button>
+        <button class="ntab" onclick="showPage('yoqilgi',this)">⛽ Yoqilg'i</button>
+        <button class="ntab" onclick="showPage('qarz',this)">💳 Qarzdorlik</button>
+        <button class="ntab" onclick="showPage('kassa',this)">💰 Kassa</button>
+        <button class="ntab" onclick="showPage('oborotka',this)">📋 Oborotka</button>
+      </div>
+      <div class="content" id="content">
+        <div class="page active" id="page-dash"></div>
+        <div class="page" id="page-reys"></div>
+        <div class="page" id="page-ishchi"></div>
+        <div class="page" id="page-yoqilgi"></div>
+        <div class="page" id="page-qarz"></div>
+        <div class="page" id="page-kassa"></div>
+        <div class="page" id="page-oborotka"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REYS MODAL -->
+<div class="overlay" id="rmodal">
+<div class="modal" id="modal-box">
+  <div class="modal-header" id="modal-drag-handle">
+    <h3 id="mtitle">Yangi Reys</h3>
+    <span class="modal-resize-hint">↔ Suring · ↘ Kattalashtiring</span>
+    <button class="btn-cancel" style="padding:4px 10px;font-size:12px" onclick="closeModal()">✕</button>
+  </div>
+  <div class="modal-body">
+  <div class="frow">
+    <div class="fgrp"><label>Reys №</label><input type="number" id="f-rnum"></div>
+    <div class="fgrp"><label>Avtomobil</label><input type="text" id="f-auto" value="566"></div>
+  </div>
+  <!-- KETISH -->
+  <div class="trip-block">
+    <div class="trip-block-title" style="color:var(--accent)">↗ KETISH</div>
+    <div class="frow">
+      <div class="fgrp"><label>Haydovchi</label><input type="text" id="f-kh" placeholder="Бегзод"></div>
+      <div class="fgrp"><label>Sana</label><input type="text" id="f-ks" placeholder="1,02,2026"></div>
+    </div>
+    <div class="frow">
+      <div class="fgrp"><label>Manzil</label><input type="text" id="f-km" placeholder="ташкент"></div>
+      <div class="fgrp"><label>Yo'l puli</label><input type="number" id="f-kyp" placeholder="600000"></div>
+    </div>
+    <div class="frow">
+      <div class="fgrp"><label>Yoqilg'i kimdan</label><input type="text" id="f-kyk"></div>
+      <div class="fgrp"><label>Litr</label><input type="number" id="f-kyl"></div>
+    </div>
+    <div class="fgrp" style="margin-bottom:10px"><label>Summa (so'm)</label><input type="number" id="f-kys"></div>
+    <div class="cargo-hdr"><span>Kimdan</span><span>Kimga</span><span>Yuk</span><span>Kg</span><span>Narh</span><span>Summa</span><span>Olindi</span><span></span></div>
+    <div id="kc-rows"></div>
+    <button class="btn-addrow" onclick="addCRow('k')">+ Yuk qo'shish</button>
+  </div>
+  <!-- KELISH -->
+  <div class="trip-block">
+    <div class="trip-block-title" style="color:var(--green)">↙ KELISH</div>
+    <div class="frow">
+      <div class="fgrp"><label>Manzil</label><input type="text" id="f-lm" placeholder="андижон"></div>
+      <div class="fgrp"><label>Sana</label><input type="text" id="f-ls" placeholder="3,02,2026"></div>
+    </div>
+    <div class="frow">
+      <div class="fgrp"><label>Yoqilg'i kimdan</label><input type="text" id="f-lyk"></div>
+      <div class="fgrp"><label>Litr</label><input type="number" id="f-lyl"></div>
+    </div>
+    <div class="fgrp" style="margin-bottom:10px"><label>Summa (so'm)</label><input type="number" id="f-lys"></div>
+    <div class="cargo-hdr"><span>Kimdan</span><span>Kimga</span><span>Yuk</span><span>Kg</span><span>Narh</span><span>Summa</span><span>Olindi</span><span></span></div>
+    <div id="lc-rows"></div>
+    <button class="btn-addrow" onclick="addCRow('l')">+ Yuk qo'shish</button>
+  </div>
+  <!-- FINANCE -->
+  <div class="trip-block">
+    <div class="trip-block-title" style="color:var(--yellow)">💰 MOLIYAVIY</div>
+    <div class="frow">
+      <div class="fgrp"><label>Belgilangan ish haqi</label><input type="number" id="f-ihq" value="600000"></div>
+      <div class="fgrp"><label>Ovqatlanish</label><input type="number" id="f-ovq"></div>
+    </div>
+    <div class="frow">
+      <div class="fgrp"><label>Remont</label><input type="number" id="f-rem"></div>
+      <div class="fgrp"><label>Moyka</label><input type="number" id="f-moy"></div>
+    </div>
+    <div class="frow">
+      <div class="fgrp"><label>Topshirilgan summa</label><input type="number" id="f-top"></div>
+      <div class="fgrp"><label>Kassa</label><input type="number" id="f-kas"></div>
+    </div>
+    <div class="frow">
+      <div class="fgrp"><label>Haydovchi kreditorligi</label><input type="number" id="f-kred"></div>
+      <div class="fgrp"><label>Samarodorlik</label><input type="number" id="f-samar"></div>
+    </div>
+  </div>
+  <div class="fgrp"><label>Holat</label>
+    <select id="f-stat">
+      <option value="tugallandi">✅ Tugallandi</option>
+      <option value="jarayonda">🕐 Jarayonda</option>
+      <option value="tekshir">⚠️ Tekshirish kerak</option>
+    </select>
+  </div>
+  <div class="mfoot">
+    <button class="btn-cancel" onclick="closeModal()">Bekor</button>
+    <button class="btn-save" onclick="saveReys()">💾 Saqlash</button>
+  </div>
+  </div><!-- /modal-body -->
+  <div class="modal-corner" title="Kattalashtirish">⊿</div>
+</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+const S = { token:'', ydPath:'', reyslar:[], curReys:null, editIdx:-1, useYD:false, wb:null };
+let kcCount=0, lcCount=0;
+
+// ══════════════════════════════════════════
+// MODAL DRAG & RESIZE
+// ══════════════════════════════════════════
+(function initModalBehavior(){
+  const STORAGE_KEY = 'modal_size';
+
+  function applyStoredSize(){
+    const box = document.getElementById('modal-box');
+    if(!box) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if(saved && saved.w && saved.h){
+        box.style.width  = Math.max(420, Math.min(saved.w, window.innerWidth*0.97)) + 'px';
+        box.style.height = Math.max(400, Math.min(saved.h, window.innerHeight*0.97)) + 'px';
+      }
+    } catch(e){}
+  }
+
+  function saveSize(){
+    const box = document.getElementById('modal-box');
+    if(!box) return;
+    const r = box.getBoundingClientRect();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({w: Math.round(r.width), h: Math.round(r.height)}));
+  }
+
+  // Save size whenever user stops resizing (native resize)
+  window.addEventListener('mouseup', ()=>{
+    const box = document.getElementById('modal-box');
+    if(box && document.getElementById('rmodal').classList.contains('open')){
+      const r = box.getBoundingClientRect();
+      // Only save if size actually changed (resize handle was used)
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
+      if(Math.abs(r.width - (saved.w||0)) > 2 || Math.abs(r.height - (saved.h||0)) > 2){
+        saveSize();
+      }
+    }
+  });
+
+  // Apply stored size each time modal opens
+  const origOpen = window.openModal || (()=>{});
+  window._applyModalSize = applyStoredSize;
+
+  // Drag to move
+  let dragging=false, dragStartX=0, dragStartY=0, boxStartX=0, boxStartY=0;
+
+  document.addEventListener('mousedown', e=>{
+    const handle = document.getElementById('modal-drag-handle');
+    if(!handle) return;
+    // Don't drag if clicking button inside header
+    if(e.target.tagName === 'BUTTON') return;
+    if(handle.contains(e.target)){
+      dragging = true;
+      const box = document.getElementById('modal-box');
+      const r = box.getBoundingClientRect();
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      boxStartX  = r.left;
+      boxStartY  = r.top;
+      box.style.position   = 'fixed';
+      box.style.margin     = '0';
+      box.style.left       = r.left + 'px';
+      box.style.top        = r.top  + 'px';
+      e.preventDefault();
+    }
+  });
+
+  document.addEventListener('mousemove', e=>{
+    if(!dragging) return;
+    const box = document.getElementById('modal-box');
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    const newLeft = Math.max(0, Math.min(boxStartX + dx, window.innerWidth  - 60));
+    const newTop  = Math.max(0, Math.min(boxStartY + dy, window.innerHeight - 60));
+    box.style.left = newLeft + 'px';
+    box.style.top  = newTop  + 'px';
+  });
+
+  document.addEventListener('mouseup', ()=>{ dragging = false; });
+})();
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.onload = async () => {
+  const t = localStorage.getItem('yd_token');
+  const p = localStorage.getItem('yd_path');
+  const d = localStorage.getItem('app_data');
+  if(t && p){
+    S.token=t; S.ydPath=p; S.useYD=true;
+    setSync('spin','Yuklanmoqda...');
+    lmsg('Yandex Disk\'dan yuklanmoqda...');
+    try{ await loadFromYD(); launch(); }
+    catch(e){ if(d){ S.reyslar=JSON.parse(d); setSync('err','Offline'); launch(); } else showSetup(); }
+  } else if(d){
+    S.reyslar=JSON.parse(d); setSync(null,'Lokal'); launch();
+  } else showSetup();
+};
+
+function lmsg(m){ document.getElementById('lmsg').textContent=m; }
+function showSetup(){
+  document.getElementById('loading').style.display='none';
+  document.getElementById('setup').style.display='block';
+  const t=localStorage.getItem('yd_token'), p=localStorage.getItem('yd_path');
+  if(t) document.getElementById('yd-token').value=t;
+  if(p) document.getElementById('yd-path').value=p;
+}
+function launch(){
+  document.getElementById('loading').style.display='none';
+  document.getElementById('setup').style.display='none';
+  document.getElementById('topbar').style.display='flex';
+  document.getElementById('app').style.display='block';
+  if(S.useYD) document.getElementById('btn-save-yd').style.display='';
+  renderAll();
+}
+
+// ══════════════════════════════════════════
+// YANDEX DISK
+// ══════════════════════════════════════════
+async function connectYD(){
+  const t=document.getElementById('yd-token').value.trim();
+  const p=document.getElementById('yd-path').value.trim();
+  const e=document.getElementById('setup-err');
+  e.style.display='none';
+  if(!t){e.textContent='Token kiriting!';e.style.display='block';return;}
+  S.token=t; S.ydPath=p; S.useYD=true;
+  document.getElementById('setup').style.display='none';
+  document.getElementById('loading').style.display='flex';
+  lmsg('Yandex Disk\'ga ulanilmoqda...');
+  try{
+    await loadFromYD();
+    localStorage.setItem('yd_token',t);
+    localStorage.setItem('yd_path',p);
+    launch();
+  } catch(err){
+    document.getElementById('loading').style.display='none';
+    document.getElementById('setup').style.display='block';
+    e.textContent='Xato: '+err.message;
+    e.style.display='block';
+  }
+}
+async function loadFromYD(){
+  setSync('spin','Yuklanmoqda...');
+  const mr=await fetch(`https://cloud-api.yandex.net/v1/disk/resources/download?path=${encodeURIComponent(S.ydPath)}`,{headers:{'Authorization':'OAuth '+S.token}});
+  if(!mr.ok) throw new Error('API '+mr.status);
+  const {href}=await mr.json();
+  const fr=await fetch(href);
+  if(!fr.ok) throw new Error('Fayl yuklanmadi');
+  const buf=await fr.arrayBuffer();
+  parseXLSX(buf);
+  setSync('ok','Yandex Disk');
+}
+async function saveToYD(){
+  if(!S.useYD) return;
+  setSync('spin','Saqlanmoqda...');
+  try{
+    const wb=buildWB();
+    const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const ur=await fetch(`https://cloud-api.yandex.net/v1/disk/resources/upload?path=${encodeURIComponent(S.ydPath)}&overwrite=true`,{headers:{'Authorization':'OAuth '+S.token}});
+    if(!ur.ok) throw new Error('Upload URL olishda xato');
+    const {href}=await ur.json();
+    const up=await fetch(href,{method:'PUT',body:blob});
+    if(!up.ok && up.status!==201) throw new Error('Yuklashda xato');
+    saveLocal();
+    setSync('ok','Saqlandi ✓');
+    setTimeout(()=>setSync('ok','Yandex Disk'),2000);
+  } catch(e){ setSync('err','Xato!'); alert('Saqlash xatosi: '+e.message); }
+}
+function setSync(t,l){
+  const d=document.getElementById('sdot'), lb=document.getElementById('slabel');
+  d.className='sdot'+(t?' '+t:'');
+  lb.textContent=l||'–';
+}
+async function loadLocal(evt){
+  const f=evt.target.files[0]; if(!f) return;
+  document.getElementById('setup').style.display='none';
+  document.getElementById('loading').style.display='flex';
+  lmsg('Fayl o\'qilmoqda...');
+  const r=new FileReader();
+  r.onload=e=>{try{parseXLSX(e.target.result);setSync(null,'Lokal fayl');launch();}catch(err){document.getElementById('loading').style.display='none';document.getElementById('setup').style.display='block';alert('Xato: '+err.message);}};
+  r.readAsArrayBuffer(f);
+}
+
+// ══════════════════════════════════════════
+// PARSE XLSX
+// ══════════════════════════════════════════
+function parseXLSX(buf){
+  const wb=XLSX.read(buf,{type:'array'});
+  S.wb=wb; S.reyslar=[];
+  const sheets=wb.SheetNames.filter(n=>n.startsWith('Лист')&&!['Лист11','Лист12','Лист13','Лист14','Лист15'].includes(n));
+  sheets.forEach((sn,idx)=>{
+    const ws=wb.Sheets[sn];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    if(!rows||rows.length<8) return;
+    const g=(r,c)=>{const v=rows[r]&&rows[r][c]!==undefined?rows[r][c]:'';return v===''||v===null||v===undefined?0:v;};
+    const gs=(r,c)=>{const v=g(r,c);return String(v).trim();};
+    const gn=(r,c)=>{const v=g(r,c);if(v===''||v===0) return 0;const n=parseFloat(String(v).replace(/[^\d.-]/g,''));return isNaN(n)?0:n;};
+    const reys={
+      id:idx+1, sheetName:sn,
+      reysNum:idx+1,
+      auto:gs(1,3)||'566',
+      haydovchi:gs(1,1),
+      ketish:{
+        sana:gs(1,4), manzil:gs(1,6),
+        yolPul:gn(0,2),
+        yoqKimdan:gs(4,15), yoqLitr:gn(4,16), yoqSumma:gn(4,17),
+        cargo:[]
+      },
+      kelish:{
+        sana:gs(1,13), manzil:gs(1,16),
+        haydovchi:gs(1,10),
+        yoqKimdan:gs(4,15), yoqLitr:gn(4,16), yoqSumma:gn(4,17),
+        cargo:[]
+      },
+      fin:{
+        ishHaqi:gn(24,3)||600000,
+        kreditorlik:gn(25,4),
+        topshirilgan:gn(29,3),
+        rasxod:gn(31,3),
+        kassa:gn(35,3),
+        samarodorlik:gn(25,16),
+        ovqatlanish:gn(25,8),
+        remont:gn(28,8),
+        moyka:gn(30,8),
+        jamiXarajat:gn(35,8),
+      },
+      status:'tugallandi',
+      notes:[]
+    };
+    // status
+    if(gs(0,7).includes('тугалланмади')||gs(0,7).includes('текшириш')) reys.status='tekshir';
+    // cargo
+    for(let r=7;r<=14;r++){
+      const kr=rows[r]||[];
+      const ks=gn(r,6);
+      if(ks>0||gs(r,3)){ reys.ketish.cargo.push({kimdan:gs(r,1),kimga:gs(r,2),yukNomi:gs(r,3),kg:gn(r,4),narh:gn(r,5),summa:ks,olindi:gn(r,7),koldi:gn(r,8)}); }
+      const ls=gn(r,16);
+      if(ls>0||gs(r,12)){ reys.kelish.cargo.push({kimdan:gs(r,10),kimga:gs(r,11),yukNomi:gs(r,12),kg:gn(r,13),narh:gn(r,14),summa:ls,olindi:gn(r,17),koldi:gn(r,18)||Math.max(0,ls-gn(r,17))}); }
+    }
+    // notes col20
+    for(let r=7;r<=14;r++){
+      const v=gs(r,20);
+      if(v&&v!=='-') reys.notes.push(v);
+    }
+    S.reyslar.push(reys);
+  });
+  saveLocal();
+}
+function buildWB(){
+  if(S.wb) return S.wb;
+  return XLSX.utils.book_new();
+}
+function saveLocal(){ localStorage.setItem('app_data',JSON.stringify(S.reyslar)); }
+
+// ══════════════════════════════════════════
+// RENDER ALL
+// ══════════════════════════════════════════
+function renderAll(){
+  renderSidebar();
+  renderDash();
+  renderIshchilar();
+  renderYoqilgi();
+  renderQarz();
+  renderKassa();
+  renderOborotka();
+  if(S.reyslar.length>0 && !S.curReys) { S.curReys=S.reyslar[0]; renderReys(); }
+}
+
+// ══════════════════════════════════════════
+// SIDEBAR
+// ══════════════════════════════════════════
+function renderSidebar(){
+  const el=document.getElementById('rlist');
+  if(!S.reyslar.length){ el.innerHTML='<div class="empty">Reys yo\'q</div>'; return; }
+  el.innerHTML=S.reyslar.map((r,i)=>{
+    const a=S.curReys===r?'active':'';
+    const sc=r.status==='tugallandi'?'s-ok':r.status==='jarayonda'?'s-go':'s-wr';
+    const sl=r.status==='tugallandi'?'✅':r.status==='jarayonda'?'🕐':'⚠️';
+    const total=cSum(r.ketish.cargo)+cSum(r.kelish.cargo);
+    return `<div class="ri ${a}" onclick="selReys(${i})">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="rn">Reys #${r.reysNum}</div>
+        <span class="sbadge ${sc}">${sl}</span>
+      </div>
+      <div class="rd">${r.ketish.sana||'–'} → ${r.kelish.sana||'–'}</div>
+      <div class="rv">${fmt(total)} so'm</div>
+    </div>`;
+  }).join('');
+}
+function selReys(i){ S.curReys=S.reyslar[i]; renderSidebar(); renderReys(); showPage('reys'); }
+
+// ══════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════
+function renderDash(){
+  const el=document.getElementById('page-dash');
+  const total=S.reyslar.length;
+  const tugal=S.reyslar.filter(r=>r.status==='tugallandi').length;
+  const tekshir=S.reyslar.filter(r=>r.status==='tekshir').length;
+  const jarayonda=S.reyslar.filter(r=>r.status==='jarayonda').length;
+
+  const allKargo=[...S.reyslar.flatMap(r=>[...r.ketish.cargo,...r.kelish.cargo])];
+  const jYuk=allKargo.reduce((s,c)=>s+c.summa,0);
+  const jOlindi=allKargo.reduce((s,c)=>s+c.olindi,0);
+  const jKoldi=allKargo.reduce((s,c)=>s+c.koldi,0);
+  const jKassa=S.reyslar.reduce((s,r)=>s+r.fin.kassa,0);
+  const jYoq=S.reyslar.reduce((s,r)=>s+r.ketish.yoqSumma+r.kelish.yoqSumma,0);
+  const jYoqL=S.reyslar.reduce((s,r)=>s+r.ketish.yoqLitr+r.kelish.yoqLitr,0);
+  const jIshHaqi=S.reyslar.reduce((s,r)=>s+r.fin.ishHaqi,0);
+  const jXarajat=S.reyslar.reduce((s,r)=>s+r.fin.jamiXarajat,0);
+  const jRasxod=S.reyslar.reduce((s,r)=>s+r.fin.rasxod,0);
+  const jTop=S.reyslar.reduce((s,r)=>s+r.fin.topshirilgan,0);
+
+  // ── REYSLAR mini bars ──
+  const maxYuk=Math.max(...S.reyslar.map(r=>cSum(r.ketish.cargo)+cSum(r.kelish.cargo)),1);
+  const reysRows=S.reyslar.map((r,i)=>{
+    const ks=cSum(r.ketish.cargo),ls=cSum(r.kelish.cargo),tot=ks+ls;
+    const koldi=r.ketish.cargo.reduce((s,c)=>s+c.koldi,0)+r.kelish.cargo.reduce((s,c)=>s+c.koldi,0);
+    const yoq=r.ketish.yoqSumma+r.kelish.yoqSumma;
+    const sc=r.status==='tugallandi'?'s-ok':r.status==='jarayonda'?'s-go':'s-wr';
+    const pct=Math.round(tot/maxYuk*100);
+    return `<tr style="cursor:pointer" onclick="selReys(${i})">
+      <td class="tf-blue" style="font-weight:700">#${r.reysNum}</td>
+      <td style="color:var(--text2);font-size:11px">${r.ketish.sana||'–'}</td>
+      <td style="color:var(--text2);font-size:11px">${r.kelish.sana||'–'}</td>
+      <td>${r.haydovchi||'–'}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;min-width:60px">
+            <div style="width:${pct}%;height:100%;background:var(--accent);border-radius:3px"></div>
+          </div>
+          <span class="tf-sum" style="font-size:11px;white-space:nowrap">${fmtK(tot)}</span>
+        </div>
+      </td>
+      <td class="tf-sum">${fmt(jOlindi>0?r.ketish.cargo.reduce((s,c)=>s+c.olindi,0)+r.kelish.cargo.reduce((s,c)=>s+c.olindi,0):0)}</td>
+      <td class="${koldi>0?'tf-red':''}">${koldi>0?fmt(koldi):'–'}</td>
+      <td class="tf-yellow">${fmt(yoq)}</td>
+      <td class="tf-purple">${fmt(r.fin.ishHaqi)}</td>
+      <td class="tf-blue">${fmt(r.fin.kassa)}</td>
+      <td><span class="sbadge ${sc}">${r.status==='tugallandi'?'✅':r.status==='jarayonda'?'🕐':'⚠️'}</span></td>
+    </tr>`;
+  }).join('');
+
+  // ── ISHCHILAR oyligi ──
+  const workers={};
+  S.reyslar.forEach(r=>{
+    const h=((r.haydovchi||'–').charAt(0).toUpperCase()+(r.haydovchi||'').slice(1).toLowerCase()).trim()||'Noma\'lum';
+    if(!workers[h]) workers[h]={name:h,reys:0,ihq:0,samar:0,kassa:0};
+    workers[h].reys++;
+    workers[h].ihq+=r.fin.ishHaqi;
+    workers[h].samar+=r.fin.samarodorlik;
+    workers[h].kassa+=r.fin.kassa;
+  });
+  const wArr=Object.values(workers);
+  const maxIhq=Math.max(...wArr.map(w=>w.ihq),1);
+  const workerRows=wArr.map(w=>`
+    <tr>
+      <td style="font-weight:700">${w.name}</td>
+      <td class="tf-blue" style="text-align:center">${w.reys}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;min-width:50px">
+            <div style="width:${Math.round(w.ihq/maxIhq*100)}%;height:100%;background:var(--purple);border-radius:3px"></div>
+          </div>
+          <span class="tf-purple" style="font-size:11px;white-space:nowrap">${fmtK(w.ihq)}</span>
+        </div>
+      </td>
+      <td class="tf-sum">${fmt(w.samar)}</td>
+      <td class="tf-blue">${fmt(w.kassa)}</td>
+    </tr>`).join('');
+
+  // ── YOQILG'I sarfi ──
+  const maxYoqR=Math.max(...S.reyslar.map(r=>r.ketish.yoqSumma+r.kelish.yoqSumma),1);
+  const yoqRows=S.reyslar.map(r=>{
+    const y=r.ketish.yoqSumma+r.kelish.yoqSumma;
+    const l=r.ketish.yoqLitr+r.kelish.yoqLitr;
+    const narh=l>0?Math.round(y/l):0;
+    return `<tr>
+      <td class="tf-blue">#${r.reysNum}</td>
+      <td style="color:var(--text2);font-size:11px">${r.ketish.sana||'–'}</td>
+      <td class="tf-yellow" style="text-align:center">${l} L</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;min-width:50px">
+            <div style="width:${Math.round(y/maxYoqR*100)}%;height:100%;background:var(--yellow);border-radius:3px"></div>
+          </div>
+          <span class="tf-yellow" style="font-size:11px;white-space:nowrap">${fmtK(y)}</span>
+        </div>
+      </td>
+      <td style="color:var(--text2);font-size:11px">${narh?fmt(narh)+'/L':'–'}</td>
+      <td style="font-size:11px">${[r.ketish.yoqKimdan,r.kelish.yoqKimdan].filter(Boolean).filter(k=>k!=='0').join(', ')||'–'}</td>
+    </tr>`;
+  }).join('');
+
+  // ── QARZDORLIK ──
+  const debts=[];
+  S.reyslar.forEach(r=>{
+    [...r.ketish.cargo,...r.kelish.cargo].forEach(c=>{
+      if(c.koldi>0) debts.push({reysNum:r.reysNum,kimdan:c.kimdan,kimga:c.kimga,yukNomi:c.yukNomi,summa:c.summa,olindi:c.olindi,koldi:c.koldi});
+    });
+  });
+  const jQarz=debts.reduce((s,d)=>s+d.koldi,0);
+  const tolPct=jYuk>0?Math.round((jOlindi/jYuk)*100):0;
+
+  // Group by kimdan
+  const byKimdan={};
+  debts.forEach(d=>{
+    const k=d.kimdan||'Noma\'lum';
+    if(!byKimdan[k]) byKimdan[k]={name:k,koldi:0,cnt:0};
+    byKimdan[k].koldi+=d.koldi; byKimdan[k].cnt++;
+  });
+  const maxQarz=Math.max(...Object.values(byKimdan).map(v=>v.koldi),1);
+  const qarzRows=Object.values(byKimdan).sort((a,b)=>b.koldi-a.koldi).map(v=>`
+    <tr>
+      <td style="font-weight:700">${v.name}</td>
+      <td class="tf-blue" style="text-align:center">${v.cnt}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;min-width:50px">
+            <div style="width:${Math.round(v.koldi/maxQarz*100)}%;height:100%;background:var(--red);border-radius:3px"></div>
+          </div>
+          <span class="tf-red" style="font-size:11px;white-space:nowrap">${fmtK(v.koldi)}</span>
+        </div>
+      </td>
+    </tr>`).join('');
+
+  // ── KASSA ──
+  const jOvq=S.reyslar.reduce((s,r)=>s+r.fin.ovqatlanish,0);
+  const jRem=S.reyslar.reduce((s,r)=>s+r.fin.remont,0);
+  const kassaRows=S.reyslar.map(r=>{
+    const yoq=r.ketish.yoqSumma+r.kelish.yoqSumma;
+    return `<tr>
+      <td class="tf-blue">#${r.reysNum}</td>
+      <td class="tf-sum">${fmt(r.fin.topshirilgan)}</td>
+      <td class="tf-yellow">${fmt(yoq)}</td>
+      <td class="tf-purple">${fmt(r.fin.ishHaqi)}</td>
+      <td class="tf-red">${fmt(r.fin.rasxod)}</td>
+      <td class="tf-blue" style="font-weight:700">${fmt(r.fin.kassa)}</td>
+    </tr>`;
+  }).join('');
+
+  const xarPct=(v)=>jXarajat>0?Math.round(v/jXarajat*100):0;
+
+  el.innerHTML=`
+  <!-- ═══ TOP KPI STRIP ═══ -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+    <div class="kpi c-blue">
+      <div class="kl">Reyslar</div>
+      <div class="kv c-blue">${total}</div>
+      <div class="ks">${tugal} ✅ · ${jarayonda} 🕐 · ${tekshir} ⚠️</div>
+    </div>
+    <div class="kpi c-green">
+      <div class="kl">Yuk Daromad</div>
+      <div class="kv c-green">${fmtM(jYuk)}</div>
+      <div class="ks">Olindi: ${fmtM(jOlindi)}</div>
+    </div>
+    <div class="kpi c-red">
+      <div class="kl">Qarzdorlik</div>
+      <div class="kv c-red">${fmtM(jKoldi)}</div>
+      <div class="ks">${debts.length} ta to'lanmagan yuk</div>
+    </div>
+    <div class="kpi c-yellow">
+      <div class="kl">Yoqilg'i</div>
+      <div class="kv c-yellow">${fmtM(jYoq)}</div>
+      <div class="ks">${Math.round(jYoqL)} litr jami</div>
+    </div>
+    <div class="kpi c-purple">
+      <div class="kl">Ish Haqi</div>
+      <div class="kv c-purple">${fmtM(jIshHaqi)}</div>
+      <div class="ks">${wArr.length} ta ishchi</div>
+    </div>
+    <div class="kpi c-cyan">
+      <div class="kl">Kassa</div>
+      <div class="kv c-cyan">${fmtM(jKassa)}</div>
+      <div class="ks">Xarajat: ${fmtM(jXarajat)}</div>
+    </div>
+  </div>
+
+  <!-- ═══ TO'LOV PROGRESS ═══ -->
+  <div class="card" style="margin-bottom:14px">
+    <div style="padding:14px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+      <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px">To'lov holati</div>
+      <div style="flex:1;min-width:140px">
+        <div style="height:10px;background:var(--surface2);border-radius:5px;overflow:hidden">
+          <div style="width:${tolPct}%;height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:5px;transition:width .5s"></div>
+        </div>
+      </div>
+      <div style="font-family:var(--mono);font-size:13px;color:var(--green);font-weight:700">${tolPct}% to'langan</div>
+      <div style="font-family:var(--mono);font-size:12px;color:var(--text2)">${fmtM(jOlindi)} / ${fmtM(jYuk)}</div>
+      ${jKoldi>0?`<div style="font-family:var(--mono);font-size:12px;color:var(--red)">Qoldi: ${fmtM(jKoldi)}</div>`:'<div style="color:var(--green);font-size:12px">🎉 Qarz yo\'q!</div>'}
+    </div>
+  </div>
+
+  <!-- ═══ 1. REYSLAR ═══ -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-head" style="display:flex;align-items:center;justify-content:space-between">
+      <span>🚛 Reyslar</span>
+      <span style="font-size:11px;color:var(--text2);font-family:var(--mono)">${total} ta reys · Jami: ${fmtM(jYuk)}</span>
+    </div>
+    <div class="table-wrap"><table>
+      <tr><th>Reys</th><th>Ketish</th><th>Kelish</th><th>Haydovchi</th><th>Yuk summa</th><th>Olindi</th><th>Qoldi</th><th>Yoqilg'i</th><th>Ish haqi</th><th>Kassa</th><th></th></tr>
+      ${reysRows||'<tr><td colspan="11" class="empty">Reys yo\'q</td></tr>'}
+      <tr style="background:var(--surface2);font-weight:700;font-family:var(--mono);font-size:12px">
+        <td colspan="4" style="color:var(--text2)">JAMI</td>
+        <td class="tf-sum">${fmt(jYuk)}</td>
+        <td class="tf-sum">${fmt(jOlindi)}</td>
+        <td class="${jKoldi>0?'tf-red':''}">${jKoldi>0?fmt(jKoldi):'–'}</td>
+        <td class="tf-yellow">${fmt(jYoq)}</td>
+        <td class="tf-purple">${fmt(jIshHaqi)}</td>
+        <td class="tf-blue">${fmt(jKassa)}</td>
+        <td></td>
+      </tr>
+    </table></div>
+  </div>
+
+  <!-- ═══ 2+3 ISHCHILAR + YOQILG'I ═══ -->
+  <div class="two-col" style="margin-bottom:14px">
+
+    <div class="card">
+      <div class="card-head" style="display:flex;align-items:center;justify-content:space-between">
+        <span>👷 Ishchilar Oyligi</span>
+        <span style="font-size:11px;color:var(--purple);font-family:var(--mono)">${fmtM(jIshHaqi)} jami</span>
+      </div>
+      <div class="table-wrap"><table>
+        <tr><th>Ism</th><th>Reys</th><th>Ish haqi</th><th>Samarodorlik</th><th>Kassa</th></tr>
+        ${workerRows||'<tr><td colspan="5" class="empty">–</td></tr>'}
+        <tr style="background:var(--surface2);font-weight:700;font-family:var(--mono);font-size:12px">
+          <td style="color:var(--text2)">JAMI</td>
+          <td class="tf-blue" style="text-align:center">${total}</td>
+          <td class="tf-purple">${fmt(jIshHaqi)}</td>
+          <td class="tf-sum">${fmt(S.reyslar.reduce((s,r)=>s+r.fin.samarodorlik,0))}</td>
+          <td class="tf-blue">${fmt(jKassa)}</td>
+        </tr>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head" style="display:flex;align-items:center;justify-content:space-between">
+        <span>⛽ Yoqilg'i Sarfi</span>
+        <span style="font-size:11px;color:var(--yellow);font-family:var(--mono)">${Math.round(jYoqL)} L · ${fmtM(jYoq)}</span>
+      </div>
+      <div class="table-wrap"><table>
+        <tr><th>Reys</th><th>Sana</th><th>Litr</th><th>Summa</th><th>Narh/L</th><th>Kimdan</th></tr>
+        ${yoqRows||'<tr><td colspan="6" class="empty">–</td></tr>'}
+        <tr style="background:var(--surface2);font-weight:700;font-family:var(--mono);font-size:12px">
+          <td colspan="2" style="color:var(--text2)">JAMI</td>
+          <td class="tf-yellow">${Math.round(jYoqL)} L</td>
+          <td colspan="3" class="tf-yellow">${fmt(jYoq)}</td>
+        </tr>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ═══ 4+5 QARZDORLIK + KASSA ═══ -->
+  <div class="two-col">
+
+    <div class="card">
+      <div class="card-head" style="display:flex;align-items:center;justify-content:space-between">
+        <span>💳 Qarzdorlik</span>
+        <span style="font-size:11px;color:var(--red);font-family:var(--mono)">${fmtM(jQarz)} qoldi</span>
+      </div>
+      ${jQarz>0?`
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border)">
+        <div class="table-wrap"><table>
+          <tr><th>Kimdan</th><th>Soni</th><th>Qarz miqdori</th></tr>
+          ${qarzRows}
+        </table></div>
+      </div>
+      <div class="table-wrap"><table>
+        <tr><th>Reys</th><th>Yo'nalish</th><th>Kimdan</th><th>Yuk</th><th>Summa</th><th>Olindi</th><th>Qoldi</th></tr>
+        ${debts.map(d=>`<tr>
+          <td class="tf-blue">#${d.reysNum}</td>
+          <td style="font-size:11px;color:var(--text2)">${d.kimdan||'–'}</td>
+          <td style="font-size:11px">${d.kimga||'–'}</td>
+          <td style="font-size:11px">${d.yukNomi||'–'}</td>
+          <td>${fmt(d.summa)}</td>
+          <td class="tf-sum">${fmt(d.olindi)}</td>
+          <td class="tf-red" style="font-weight:700">${fmt(d.koldi)}</td>
+        </tr>`).join('')}
+        <tr style="background:var(--surface2);font-weight:700;font-family:var(--mono);font-size:12px">
+          <td colspan="4" style="color:var(--text2)">JAMI QARZ</td>
+          <td>${fmt(jYuk)}</td>
+          <td class="tf-sum">${fmt(jOlindi)}</td>
+          <td class="tf-red">${fmt(jQarz)}</td>
+        </tr>
+      </table></div>`
+      :`<div class="empty" style="padding:30px">🎉 Barcha yuklar to'langan!</div>`}
+    </div>
+
+    <div class="card">
+      <div class="card-head" style="display:flex;align-items:center;justify-content:space-between">
+        <span>💰 Kassa</span>
+        <span style="font-size:11px;color:var(--cyan);font-family:var(--mono)">${fmtM(jKassa)}</span>
+      </div>
+      <!-- Xarajatlar taqsimoti -->
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2);margin-bottom:10px">Xarajatlar taqsimoti</div>
+        ${[
+          {l:'Yoqilg\'i',v:jYoq,c:'var(--yellow)'},
+          {l:'Ish haqi',v:jIshHaqi,c:'var(--purple)'},
+          {l:'Ovqatlanish',v:jOvq,c:'var(--accent)'},
+          {l:'Remont',v:jRem,c:'var(--red)'},
+        ].filter(x=>x.v>0).map(x=>`
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+            <div style="width:80px;font-size:11px;color:var(--text2)">${x.l}</div>
+            <div style="flex:1;height:8px;background:var(--surface2);border-radius:4px">
+              <div style="width:${xarPct(x.v)}%;height:100%;background:${x.c};border-radius:4px"></div>
+            </div>
+            <div style="font-family:var(--mono);font-size:11px;width:80px;text-align:right;color:${x.c}">${fmtK(x.v)}</div>
+            <div style="font-family:var(--mono);font-size:10px;width:32px;text-align:right;color:var(--text2)">${xarPct(x.v)}%</div>
+          </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border);font-size:12px;font-family:var(--mono)">
+          <span style="color:var(--text2)">Jami xarajat:</span>
+          <span class="tf-red" style="font-weight:700">${fmt(jXarajat)}</span>
+        </div>
+      </div>
+      <!-- Kassa jadvali -->
+      <div class="table-wrap"><table>
+        <tr><th>Reys</th><th>Topshirildi</th><th>Yoqilg'i</th><th>Ish haqi</th><th>Rasxod</th><th>Kassa</th></tr>
+        ${kassaRows||'<tr><td colspan="6" class="empty">–</td></tr>'}
+        <tr style="background:var(--surface2);font-weight:700;font-family:var(--mono);font-size:12px">
+          <td style="color:var(--text2)">JAMI</td>
+          <td class="tf-sum">${fmt(jTop)}</td>
+          <td class="tf-yellow">${fmt(jYoq)}</td>
+          <td class="tf-purple">${fmt(jIshHaqi)}</td>
+          <td class="tf-red">${fmt(jRasxod)}</td>
+          <td class="tf-blue" style="font-weight:800">${fmt(jKassa)}</td>
+        </tr>
+      </table></div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// REYS DETAIL
+// ══════════════════════════════════════════
+function renderReys(){
+  const el=document.getElementById('page-reys');
+  if(!S.curReys){ el.innerHTML='<div class="empty">Reys tanlanmagan</div>'; return; }
+  const r=S.curReys;
+  const i=S.reyslar.indexOf(r);
+  const sc=r.status==='tugallandi'?'var(--green)':r.status==='jarayonda'?'var(--yellow)':'var(--red)';
+  const sl=r.status==='tugallandi'?'✅ Tugallandi':r.status==='jarayonda'?'🕐 Jarayonda':'⚠️ Tekshirish kerak';
+  const ks=cSum(r.ketish.cargo), ls=cSum(r.kelish.cargo);
+  const koldi=r.ketish.cargo.reduce((s,c)=>s+c.koldi,0)+r.kelish.cargo.reduce((s,c)=>s+c.koldi,0);
+  const yoq=r.ketish.yoqSumma+r.kelish.yoqSumma;
+
+  const notesHtml=r.notes.length?`<div class="notice">📝 ${r.notes.join(' · ')}</div>`:'';
+
+  el.innerHTML=`
+    <div class="dhead">
+      <h2>Reys #${r.reysNum}</h2>
+      <span class="status-badge" style="background:${sc}22;color:${sc};border:1px solid ${sc}44">${sl}</span>
+      <button class="btn-topbar" style="margin-left:auto" onclick="editReys(${i})">✏️ Tahrirlash</button>
+    </div>
+    ${notesHtml}
+    <div class="kpi-grid">
+      <div class="kpi c-blue"><div class="kl">Ketish Yuki</div><div class="kv c-blue">${fmt(ks)}</div></div>
+      <div class="kpi c-green"><div class="kl">Kelish Yuki</div><div class="kv c-green">${fmt(ls)}</div></div>
+      <div class="kpi c-red"><div class="kl">Qoldi</div><div class="kv c-red">${fmt(koldi)}</div></div>
+      <div class="kpi c-yellow"><div class="kl">Yoqilg'i</div><div class="kv c-yellow">${fmt(yoq)}</div><div class="ks">${r.ketish.yoqLitr+r.kelish.yoqLitr} litr</div></div>
+      <div class="kpi c-purple"><div class="kl">Ish Haqi</div><div class="kv c-purple">${fmt(r.fin.ishHaqi)}</div></div>
+      <div class="kpi c-cyan"><div class="kl">Kassa</div><div class="kv c-cyan">${fmt(r.fin.kassa)}</div></div>
+    </div>
+    <div class="trip-pair">
+      ${tripCard(r,'ketish')}
+      ${tripCard(r,'kelish')}
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head">💰 Moliyaviy Ma'lumotlar</div>
+        <table>
+          <tr><th>Ko'rsatkich</th><th>Summa</th></tr>
+          ${finRow('Belgilangan ish haqi',r.fin.ishHaqi,'tf-purple')}
+          ${finRow('Haydovchi kreditorligi',r.fin.kreditorlik,'tf-blue')}
+          ${finRow('Topshirilgan summa',r.fin.topshirilgan,'tf-sum')}
+          ${finRow('Rasxod',r.fin.rasxod,'tf-red')}
+          ${finRow('Samarodorlik',r.fin.samarodorlik,'tf-sum')}
+          ${finRow('Kassa',r.fin.kassa,'tf-blue')}
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head">📦 Xarajatlar</div>
+        <table>
+          <tr><th>Turi</th><th>Summa</th></tr>
+          ${finRow('Yo\'l puli',r.ketish.yolPul,'tf-blue')}
+          ${finRow('Yoqilg\'i',yoq,'tf-yellow')}
+          ${finRow('Ovqatlanish',r.fin.ovqatlanish,'tf-yellow')}
+          ${finRow('Remont',r.fin.remont,'tf-red')}
+          ${finRow('Moyka',r.fin.moyka,'')}
+          ${finRow('Ish haqi',r.fin.ishHaqi,'tf-purple')}
+          <tr style="background:var(--surface2)"><td style="font-weight:700">JAMI</td><td class="tf-red" style="font-weight:700">${fmt(r.fin.jamiXarajat)}</td></tr>
+        </table>
+      </div>
+    </div>`;
+}
+function finRow(label,val,cls){
+  if(!val||val===0) return '';
+  return `<tr><td style="color:var(--text2)">${label}</td><td class="${cls}">${fmt(val)}</td></tr>`;
+}
+function tripCard(r,dir){
+  const d=r[dir];
+  const total=cSum(d.cargo);
+  const olindi=d.cargo.reduce((s,c)=>s+c.olindi,0);
+  const koldi=d.cargo.reduce((s,c)=>s+c.koldi,0);
+  const isK=dir==='ketish';
+  const cargoRows=d.cargo.filter(c=>c.summa>0||c.yukNomi).map(c=>`
+    <tr>
+      <td>${c.kimdan||'–'}</td><td>${c.kimga||'–'}</td><td>${c.yukNomi||'–'}</td>
+      <td>${c.kg||'–'}</td><td>${c.narh?fmt(c.narh):'–'}</td>
+      <td class="tf-sum">${fmt(c.summa)}</td>
+      <td class="tf-sum">${fmt(c.olindi)}</td>
+      <td class="${c.koldi>0?'tf-red':''}">${c.koldi>0?fmt(c.koldi):'–'}</td>
+    </tr>`).join('');
+  return `<div class="trip-card">
+    <div class="tc-head">
+      <span class="dir-label ${isK?'dl-k':'dl-l'}">${isK?'↗ KETISH':'↙ KELISH'}</span>
+      <span style="font-family:var(--mono);font-size:11px;color:var(--text2)">${d.sana||'–'} · ${d.manzil||'–'}</span>
+    </div>
+    <div class="tc-meta">
+      <div class="tm"><div class="mk">Yoqilg'i kimdan</div><div class="mv">${d.yoqKimdan||'–'}</div></div>
+      <div class="tm"><div class="mk">Litr / Summa</div><div class="mv">${d.yoqLitr||0}L · ${fmt(d.yoqSumma)}</div></div>
+      ${isK?`<div class="tm"><div class="mk">Yo'l puli</div><div class="mv">${fmt(d.yolPul)}</div></div>
+      <div class="tm"><div class="mk">Haydovchi</div><div class="mv">${d.haydovchi||r.haydovchi||'–'}</div></div>`:''}
+    </div>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Kimdan</th><th>Kimga</th><th>Yuk</th><th>Kg</th><th>Narh</th><th>Summa</th><th>Olindi</th><th>Qoldi</th></tr>
+        ${cargoRows||'<tr><td colspan="8" class="empty">Yuk yo\'q</td></tr>'}
+        ${total>0?`<tr style="background:var(--surface2);font-weight:700">
+          <td colspan="5" style="color:var(--text2)">JAMI</td>
+          <td class="tf-sum">${fmt(total)}</td>
+          <td class="tf-sum">${fmt(olindi)}</td>
+          <td class="${koldi>0?'tf-red':''}">${koldi>0?fmt(koldi):'–'}</td>
+        </tr>`:''}
+      </table>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// ISHCHILAR OYLIGI
+// ══════════════════════════════════════════
+function renderIshchilar(){
+  const el=document.getElementById('page-ishchi');
+  // Group by haydovchi
+  const map={};
+  S.reyslar.forEach(r=>{
+    const h=(r.haydovchi||'–').toLowerCase().trim();
+    const k=h.charAt(0).toUpperCase()+h.slice(1);
+    if(!map[k]) map[k]={name:k,reyslar:[],jami:0,samarodorlik:0};
+    map[k].reyslar.push(r);
+    map[k].jami+=r.fin.ishHaqi;
+    map[k].samarodorlik+=r.fin.samarodorlik;
+  });
+  const workers=Object.values(map);
+  const totalIshHaqi=workers.reduce((s,w)=>s+w.jami,0);
+
+  const rows=workers.map(w=>`
+    <tr>
+      <td><b>${w.name}</b></td>
+      <td class="tf-blue">${w.reyslar.length}</td>
+      <td class="tf-purple">${fmt(w.jami)}</td>
+      <td class="tf-sum">${fmt(w.samarodorlik)}</td>
+      <td>${w.reyslar.map(r=>`<span class="sbadge s-ok" style="margin-right:3px">#${r.reysNum}</span>`).join('')}</td>
+    </tr>`).join('');
+
+  // Per-reys table
+  const reysSatrs=S.reyslar.map(r=>`
+    <tr>
+      <td class="tf-blue">#${r.reysNum}</td>
+      <td>${r.haydovchi||'–'}</td>
+      <td>${r.ketish.sana||'–'} → ${r.kelish.sana||'–'}</td>
+      <td class="tf-purple">${fmt(r.fin.ishHaqi)}</td>
+      <td class="tf-sum">${fmt(r.fin.samarodorlik)}</td>
+      <td class="tf-blue">${fmt(r.fin.kassa)}</td>
+      <td class="tf-red">${fmt(r.fin.rasxod)}</td>
+      <td><span class="sbadge ${r.status==='tugallandi'?'s-ok':r.status==='jarayonda'?'s-go':'s-wr'}">${r.status==='tugallandi'?'✅':'🕐'}</span></td>
+    </tr>`).join('');
+
+  el.innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi c-purple"><div class="kl">Jami Ish Haqi</div><div class="kv c-purple">${fmtM(totalIshHaqi)}</div><div class="ks">${S.reyslar.length} reys uchun</div></div>
+      <div class="kpi c-green"><div class="kl">O'rtacha Kassa</div><div class="kv c-green">${fmtM(S.reyslar.length?S.reyslar.reduce((s,r)=>s+r.fin.kassa,0)/S.reyslar.length:0)}</div><div class="ks">1 reys uchun</div></div>
+      <div class="kpi c-cyan"><div class="kl">Ishchilar Soni</div><div class="kv c-cyan">${workers.length}</div></div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head">👷 Ishchilar Xulosasi</div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Ism</th><th>Reyslar</th><th>Jami ish haqi</th><th>Samarodorlik</th><th>Reyslar</th></tr>
+          ${rows}
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">📋 Reys Bo'yicha Ish Haqi</div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Reys</th><th>Haydovchi</th><th>Sana</th><th>Ish haqi</th><th>Samarodorlik</th><th>Kassa</th><th>Rasxod</th><th>Holat</th></tr>
+          ${reysSatrs}
+          <tr style="background:var(--surface2);font-weight:700">
+            <td colspan="3" style="color:var(--text2)">JAMI</td>
+            <td class="tf-purple">${fmt(S.reyslar.reduce((s,r)=>s+r.fin.ishHaqi,0))}</td>
+            <td class="tf-sum">${fmt(S.reyslar.reduce((s,r)=>s+r.fin.samarodorlik,0))}</td>
+            <td class="tf-blue">${fmt(S.reyslar.reduce((s,r)=>s+r.fin.kassa,0))}</td>
+            <td class="tf-red">${fmt(S.reyslar.reduce((s,r)=>s+r.fin.rasxod,0))}</td>
+            <td></td>
+          </tr>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+// YOQILG'I
+// ══════════════════════════════════════════
+function renderYoqilgi(){
+  const el=document.getElementById('page-yoqilgi');
+  const jLitr=S.reyslar.reduce((s,r)=>s+r.ketish.yoqLitr+r.kelish.yoqLitr,0);
+  const jSum=S.reyslar.reduce((s,r)=>s+r.ketish.yoqSumma+r.kelish.yoqSumma,0);
+  const avgLitr=S.reyslar.length?jLitr/S.reyslar.length:0;
+  const avgNarh=jLitr>0?jSum/jLitr:0;
+
+  // Who supplies fuel
+  const kimdan={};
+  S.reyslar.forEach(r=>{
+    [r.ketish,r.kelish].forEach(d=>{
+      if(d.yoqKimdan&&d.yoqKimdan!=='0'&&d.yoqSumma>0){
+        if(!kimdan[d.yoqKimdan]) kimdan[d.yoqKimdan]={litr:0,summa:0,count:0};
+        kimdan[d.yoqKimdan].litr+=d.yoqLitr;
+        kimdan[d.yoqKimdan].summa+=d.yoqSumma;
+        kimdan[d.yoqKimdan].count++;
+      }
+    });
+  });
+  const supplierRows=Object.entries(kimdan).map(([k,v])=>`
+    <tr><td>${k}</td><td class="tf-yellow">${Math.round(v.litr)}</td><td class="tf-sum">${fmt(v.summa)}</td><td>${v.count}</td></tr>`).join('');
+
+  const reysSatrs=S.reyslar.map(r=>{
+    const litr=r.ketish.yoqLitr+r.kelish.yoqLitr;
+    const sum=r.ketish.yoqSumma+r.kelish.yoqSumma;
+    const narh=litr>0?Math.round(sum/litr):0;
+    return `<tr>
+      <td class="tf-blue">#${r.reysNum}</td>
+      <td>${r.ketish.sana||'–'}</td>
+      <td class="tf-yellow">${r.ketish.yoqLitr}</td>
+      <td class="tf-sum">${fmt(r.ketish.yoqSumma)}</td>
+      <td>${r.ketish.yoqKimdan||'–'}</td>
+      <td class="tf-yellow">${r.kelish.yoqLitr}</td>
+      <td class="tf-sum">${fmt(r.kelish.yoqSumma)}</td>
+      <td class="tf-yellow" style="font-weight:700">${litr}</td>
+      <td class="tf-sum" style="font-weight:700">${fmt(sum)}</td>
+      <td style="color:var(--text2)">${narh?fmt(narh)+' so\'m/L':'–'}</td>
+    </tr>`;
+  }).join('');
+
+  const maxYoq=Math.max(...S.reyslar.map(r=>r.ketish.yoqSumma+r.kelish.yoqSumma),1);
+  const bars=S.reyslar.map(r=>{
+    const y=r.ketish.yoqSumma+r.kelish.yoqSumma;
+    return `<div class="bc-row">
+      <div class="bc-label">#${r.reysNum}</div>
+      <div class="bc-bar-wrap">
+        <div class="bc-bar" style="width:${Math.round(y/maxYoq*100)}%;background:var(--yellow)"></div>
+        <div class="bc-val">${r.ketish.yoqLitr+r.kelish.yoqLitr}L</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi c-yellow"><div class="kl">Jami Yoqilg'i</div><div class="kv c-yellow">${Math.round(jLitr)} L</div><div class="ks">${fmtM(jSum)}</div></div>
+      <div class="kpi c-blue"><div class="kl">O'rtacha / Reys</div><div class="kv c-blue">${Math.round(avgLitr)} L</div><div class="ks">1 reys uchun</div></div>
+      <div class="kpi c-green"><div class="kl">O'rtacha Narh</div><div class="kv c-green">${fmt(Math.round(avgNarh))}</div><div class="ks">1 litr narhi</div></div>
+      <div class="kpi c-purple"><div class="kl">Jami Summa</div><div class="kv c-purple">${fmtM(jSum)}</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head">⛽ Reys Bo'yicha Sarfi</div>
+        <div style="padding:14px"><div class="bar-chart">${bars}</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">🏭 Kimdan Olindi</div>
+        <div class="table-wrap"><table>
+          <tr><th>Manbaa</th><th>Litr</th><th>Summa</th><th>Marta</th></tr>
+          ${supplierRows||'<tr><td colspan="4" class="empty">–</td></tr>'}
+        </table></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">📋 Reys Bo'yicha Batafsil</div>
+      <div class="table-wrap"><table>
+        <tr><th>Reys</th><th>Sana</th><th>Ketish L</th><th>Ketish ₽</th><th>K-kimdan</th><th>Kelish L</th><th>Kelish ₽</th><th>Jami L</th><th>Jami ₽</th><th>Narh/L</th></tr>
+        ${reysSatrs}
+        <tr style="background:var(--surface2);font-weight:700">
+          <td colspan="2">JAMI</td>
+          <td class="tf-yellow">${Math.round(S.reyslar.reduce((s,r)=>s+r.ketish.yoqLitr,0))}</td>
+          <td class="tf-sum">${fmt(S.reyslar.reduce((s,r)=>s+r.ketish.yoqSumma,0))}</td>
+          <td></td>
+          <td class="tf-yellow">${Math.round(S.reyslar.reduce((s,r)=>s+r.kelish.yoqLitr,0))}</td>
+          <td class="tf-sum">${fmt(S.reyslar.reduce((s,r)=>s+r.kelish.yoqSumma,0))}</td>
+          <td class="tf-yellow">${Math.round(jLitr)}</td>
+          <td class="tf-sum">${fmt(jSum)}</td>
+          <td></td>
+        </tr>
+      </table></div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+// QARZDORLIK
+// ══════════════════════════════════════════
+function renderQarz(){
+  const el=document.getElementById('page-qarz');
+  // Cargo debts
+  const debts=[];
+  S.reyslar.forEach(r=>{
+    [...r.ketish.cargo,...r.kelish.cargo].forEach(c=>{
+      if(c.koldi>0){
+        debts.push({
+          reysNum:r.reysNum, kimdan:c.kimdan, kimga:c.kimga,
+          yukNomi:c.yukNomi, summa:c.summa, olindi:c.olindi, koldi:c.koldi,
+          dir:r.ketish.cargo.includes(c)?'кетиш':'келиш'
+        });
+      }
+    });
+  });
+  const jKoldi=debts.reduce((s,d)=>s+d.koldi,0);
+  const jSumma=debts.reduce((s,d)=>s+d.summa,0);
+  const pct=jSumma>0?Math.round((jKoldi/jSumma)*100):0;
+
+  // Group by kimdan
+  const byKimdan={};
+  debts.forEach(d=>{
+    const k=d.kimdan||'Noma\'lum';
+    if(!byKimdan[k]) byKimdan[k]={name:k,koldi:0,count:0};
+    byKimdan[k].koldi+=d.koldi;
+    byKimdan[k].count++;
+  });
+  const maxD=Math.max(...Object.values(byKimdan).map(v=>v.koldi),1);
+  const bars=Object.values(byKimdan).sort((a,b)=>b.koldi-a.koldi).map(v=>`
+    <div class="bc-row">
+      <div class="bc-label">${v.name.substring(0,10)}</div>
+      <div class="bc-bar-wrap">
+        <div class="bc-bar" style="width:${Math.round(v.koldi/maxD*100)}%;background:var(--red)"></div>
+        <div class="bc-val">${fmtK(v.koldi)}</div>
+      </div>
+    </div>`).join('');
+
+  el.innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi c-red"><div class="kl">Jami Qarzdorlik</div><div class="kv c-red">${fmtM(jKoldi)}</div><div class="ks">${debts.length} ta yuk</div></div>
+      <div class="kpi c-blue"><div class="kl">Jami Summa</div><div class="kv c-blue">${fmtM(jSumma)}</div></div>
+      <div class="kpi c-green"><div class="kl">To'langan %</div><div class="kv c-green">${100-pct}%</div><div class="ks">
+        <div class="pbar"><div class="pbar-fill" style="width:${100-pct}%;background:var(--green)"></div></div>
+      </div></div>
+      <div class="kpi c-yellow"><div class="kl">Qarzdorlar Soni</div><div class="kv c-yellow">${Object.keys(byKimdan).length}</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head">🏢 Kimdan Qarz (eng ko'p)</div>
+        <div style="padding:14px"><div class="bar-chart">${bars||'<div class="empty">Qarz yo\'q</div>'}</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">📊 Qarz Holati</div>
+        <table>
+          <tr><th>Ko'rsatkich</th><th>Summa</th></tr>
+          <tr><td>Jami yuk summa</td><td class="tf-blue">${fmt(jSumma)}</td></tr>
+          <tr><td>To'langan (olindi)</td><td class="tf-sum">${fmt(jSumma-jKoldi)}</td></tr>
+          <tr><td>Qoldi (qarz)</td><td class="tf-red">${fmt(jKoldi)}</td></tr>
+          <tr><td>To'lanish %</td><td class="${pct>30?'tf-red':'tf-sum'}">${100-pct}%</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">📋 Barcha Qarzlar Ro'yxati</div>
+      <div class="table-wrap"><table>
+        <tr><th>Reys</th><th>Yo'nalish</th><th>Kimdan</th><th>Kimga</th><th>Yuk</th><th>Summa</th><th>Olindi</th><th>Qoldi</th></tr>
+        ${debts.length?debts.map(d=>`
+          <tr>
+            <td class="tf-blue">#${d.reysNum}</td>
+            <td><span class="sbadge ${d.dir==='кетиш'?'s-go':'s-ok'}">${d.dir}</span></td>
+            <td>${d.kimdan||'–'}</td><td>${d.kimga||'–'}</td><td>${d.yukNomi||'–'}</td>
+            <td>${fmt(d.summa)}</td>
+            <td class="tf-sum">${fmt(d.olindi)}</td>
+            <td class="tf-red">${fmt(d.koldi)}</td>
+          </tr>`).join(''):'<tr><td colspan="8" class="empty">🎉 Qarz yo\'q!</td></tr>'}
+        ${debts.length?`<tr style="background:var(--surface2);font-weight:700">
+          <td colspan="5">JAMI</td>
+          <td>${fmt(jSumma)}</td>
+          <td class="tf-sum">${fmt(jSumma-jKoldi)}</td>
+          <td class="tf-red">${fmt(jKoldi)}</td>
+        </tr>`:''}
+      </table></div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+// KASSA
+// ══════════════════════════════════════════
+function renderKassa(){
+  const el=document.getElementById('page-kassa');
+  const jKassa=S.reyslar.reduce((s,r)=>s+r.fin.kassa,0);
+  const jRasxod=S.reyslar.reduce((s,r)=>s+r.fin.rasxod,0);
+  const jTop=S.reyslar.reduce((s,r)=>s+r.fin.topshirilgan,0);
+  const jYoq=S.reyslar.reduce((s,r)=>s+r.ketish.yoqSumma+r.kelish.yoqSumma,0);
+  const jIhq=S.reyslar.reduce((s,r)=>s+r.fin.ishHaqi,0);
+  const jOvq=S.reyslar.reduce((s,r)=>s+r.fin.ovqatlanish,0);
+  const jRem=S.reyslar.reduce((s,r)=>s+r.fin.remont,0);
+  const jMoy=S.reyslar.reduce((s,r)=>s+r.fin.moyka,0);
+  const jXar=S.reyslar.reduce((s,r)=>s+r.fin.jamiXarajat,0);
+
+  const rows=S.reyslar.map(r=>{
+    const yoq=r.ketish.yoqSumma+r.kelish.yoqSumma;
+    return `<tr>
+      <td class="tf-blue">#${r.reysNum}</td>
+      <td>${r.ketish.sana||'–'}</td>
+      <td class="tf-sum">${fmt(r.fin.topshirilgan)}</td>
+      <td class="tf-red">${fmt(r.fin.rasxod)}</td>
+      <td class="tf-yellow">${fmt(yoq)}</td>
+      <td class="tf-purple">${fmt(r.fin.ishHaqi)}</td>
+      <td class="tf-yellow">${fmt(r.fin.ovqatlanish)}</td>
+      <td>${r.fin.remont>0?`<span class="tf-red">${fmt(r.fin.remont)}</span>`:'–'}</td>
+      <td class="tf-blue">${fmt(r.fin.kassa)}</td>
+      <td class="${r.fin.kreditorlik>r.fin.kassa?'tf-red':'tf-sum'}">${fmt(r.fin.kreditorlik)}</td>
+    </tr>`;
+  }).join('');
+
+  // Xarajatlar taqsimoti
+  const xarData=[
+    {label:'Yoqilg\'i',val:jYoq,color:'var(--yellow)'},
+    {label:'Ish haqi',val:jIhq,color:'var(--purple)'},
+    {label:'Ovqatlanish',val:jOvq,color:'var(--accent)'},
+    {label:'Remont',val:jRem,color:'var(--red)'},
+    {label:'Moyka',val:jMoy,color:'var(--cyan)'},
+  ];
+  const maxX=Math.max(...xarData.map(x=>x.val),1);
+  const xarBars=xarData.filter(x=>x.val>0).map(x=>`
+    <div class="bc-row">
+      <div class="bc-label">${x.label}</div>
+      <div class="bc-bar-wrap">
+        <div class="bc-bar" style="width:${Math.round(x.val/maxX*100)}%;background:${x.color}"></div>
+        <div class="bc-val">${fmtK(x.val)}</div>
+      </div>
+    </div>`).join('');
+
+  el.innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi c-cyan"><div class="kl">Jami Kassa</div><div class="kv c-cyan">${fmtM(jKassa)}</div><div class="ks">${S.reyslar.length} reys</div></div>
+      <div class="kpi c-green"><div class="kl">Topshirilgan</div><div class="kv c-green">${fmtM(jTop)}</div></div>
+      <div class="kpi c-red"><div class="kl">Jami Rasxod</div><div class="kv c-red">${fmtM(jRasxod)}</div></div>
+      <div class="kpi c-yellow"><div class="kl">Yoqilg'i</div><div class="kv c-yellow">${fmtM(jYoq)}</div></div>
+      <div class="kpi c-purple"><div class="kl">Ish Haqi</div><div class="kv c-purple">${fmtM(jIhq)}</div></div>
+      <div class="kpi c-blue"><div class="kl">Ovqatlanish</div><div class="kv c-blue">${fmtM(jOvq)}</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head">📊 Xarajatlar Taqsimoti</div>
+        <div style="padding:14px"><div class="bar-chart">${xarBars}</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">💰 Kassa Xulosasi</div>
+        <table>
+          <tr><th>Ko'rsatkich</th><th>Summa</th><th>%</th></tr>
+          ${xarData.filter(x=>x.val>0).map(x=>`
+          <tr>
+            <td style="color:var(--text2)">${x.label}</td>
+            <td style="font-family:var(--mono)">${fmt(x.val)}</td>
+            <td style="font-family:var(--mono);color:var(--text2)">${jRasxod?Math.round(x.val/jRasxod*100)+'%':'–'}</td>
+          </tr>`).join('')}
+          <tr style="background:var(--surface2);font-weight:700"><td>JAMI XARAJAT</td><td class="tf-red">${fmt(jXar)}</td><td></td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">📋 Reys Bo'yicha Kassa</div>
+      <div class="table-wrap"><table>
+        <tr><th>Reys</th><th>Sana</th><th>Topshirildi</th><th>Rasxod</th><th>Yoqilg'i</th><th>Ish haqi</th><th>Ovqat</th><th>Remont</th><th>Kassa</th><th>Kreditorlik</th></tr>
+        ${rows}
+        <tr style="background:var(--surface2);font-weight:700">
+          <td colspan="2">JAMI</td>
+          <td class="tf-sum">${fmt(jTop)}</td>
+          <td class="tf-red">${fmt(jRasxod)}</td>
+          <td class="tf-yellow">${fmt(jYoq)}</td>
+          <td class="tf-purple">${fmt(jIhq)}</td>
+          <td class="tf-blue">${fmt(jOvq)}</td>
+          <td class="tf-red">${jRem>0?fmt(jRem):'–'}</td>
+          <td class="tf-blue">${fmt(jKassa)}</td>
+          <td></td>
+        </tr>
+      </table></div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+// OBOROTKA
+// ══════════════════════════════════════════
+function renderOborotka(){
+  const el=document.getElementById('page-oborotka');
+  const all=[];
+  S.reyslar.forEach(r=>{
+    r.ketish.cargo.forEach(c=>{ if(c.summa>0||c.yukNomi) all.push({...c,dir:'кетиш',sana:r.ketish.sana,manzil:r.ketish.manzil,haydovchi:r.haydovchi,reysNum:r.reysNum}); });
+    r.kelish.cargo.forEach(c=>{ if(c.summa>0||c.yukNomi) all.push({...c,dir:'келиш',sana:r.kelish.sana,manzil:r.kelish.manzil,haydovchi:r.haydovchi,reysNum:r.reysNum}); });
+  });
+  const jS=all.reduce((s,c)=>s+c.summa,0);
+  const jO=all.reduce((s,c)=>s+c.olindi,0);
+  const jK=all.reduce((s,c)=>s+c.koldi,0);
+
+  el.innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi c-blue"><div class="kl">Yozuvlar</div><div class="kv c-blue">${all.length}</div></div>
+      <div class="kpi c-green"><div class="kl">Jami Summa</div><div class="kv c-green">${fmtM(jS)}</div></div>
+      <div class="kpi c-cyan"><div class="kl">Olindi</div><div class="kv c-cyan">${fmtM(jO)}</div></div>
+      <div class="kpi c-red"><div class="kl">Qoldi</div><div class="kv c-red">${fmtM(jK)}</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head">📋 Оборотка — Barcha Yuklar</div>
+      <div class="table-wrap"><table>
+        <tr><th>Reys</th><th>Sana</th><th>Manzil</th><th>Kimdan</th><th>Kimga</th><th>Yuk</th><th>Kg</th><th>Narh</th><th>Summa</th><th>Olindi</th><th>Qoldi</th><th>Yo'nalish</th></tr>
+        ${all.map(c=>`
+          <tr>
+            <td class="tf-blue">${c.reysNum}</td>
+            <td>${c.sana||'–'}</td>
+            <td>${c.manzil||'–'}</td>
+            <td>${c.kimdan||'–'}</td>
+            <td>${c.kimga||'–'}</td>
+            <td>${c.yukNomi||'–'}</td>
+            <td>${c.kg||'–'}</td>
+            <td>${c.narh?fmt(c.narh):'–'}</td>
+            <td class="tf-sum">${fmt(c.summa)}</td>
+            <td class="tf-sum">${fmt(c.olindi)}</td>
+            <td class="${c.koldi>0?'tf-red':''}">${c.koldi>0?fmt(c.koldi):'–'}</td>
+            <td><span class="sbadge ${c.dir==='кетиш'?'s-go':'s-ok'}">${c.dir}</span></td>
+          </tr>`).join('')}
+      </table></div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════
+function openAdd(){
+  S.editIdx=-1;
+  document.getElementById('mtitle').textContent='Yangi Reys';
+  document.getElementById('f-rnum').value=S.reyslar.length+1;
+  document.getElementById('f-auto').value='566';
+  clearForm();
+  document.getElementById('rmodal').classList.add('open');
+  _openModalReset();
+}
+function editReys(i){
+  const r=S.reyslar[i]; S.editIdx=i;
+  document.getElementById('mtitle').textContent=`Reys #${r.reysNum} Tahrirlash`;
+  document.getElementById('f-rnum').value=r.reysNum;
+  document.getElementById('f-auto').value=r.auto;
+  document.getElementById('f-kh').value=r.haydovchi||'';
+  document.getElementById('f-ks').value=r.ketish.sana||'';
+  document.getElementById('f-km').value=r.ketish.manzil||'';
+  document.getElementById('f-kyp').value=r.ketish.yolPul||'';
+  document.getElementById('f-kyk').value=r.ketish.yoqKimdan||'';
+  document.getElementById('f-kyl').value=r.ketish.yoqLitr||'';
+  document.getElementById('f-kys').value=r.ketish.yoqSumma||'';
+  document.getElementById('f-lm').value=r.kelish.manzil||'';
+  document.getElementById('f-ls').value=r.kelish.sana||'';
+  document.getElementById('f-lyk').value=r.kelish.yoqKimdan||'';
+  document.getElementById('f-lyl').value=r.kelish.yoqLitr||'';
+  document.getElementById('f-lys').value=r.kelish.yoqSumma||'';
+  document.getElementById('f-ihq').value=r.fin.ishHaqi||600000;
+  document.getElementById('f-ovq').value=r.fin.ovqatlanish||'';
+  document.getElementById('f-rem').value=r.fin.remont||'';
+  document.getElementById('f-moy').value=r.fin.moyka||'';
+  document.getElementById('f-top').value=r.fin.topshirilgan||'';
+  document.getElementById('f-kas').value=r.fin.kassa||'';
+  document.getElementById('f-kred').value=r.fin.kreditorlik||'';
+  document.getElementById('f-samar').value=r.fin.samarodorlik||'';
+  document.getElementById('f-stat').value=r.status;
+  document.getElementById('kc-rows').innerHTML='';
+  document.getElementById('lc-rows').innerHTML='';
+  kcCount=0; lcCount=0;
+  r.ketish.cargo.forEach(c=>addCRow('k',c));
+  r.kelish.cargo.forEach(c=>addCRow('l',c));
+  document.getElementById('rmodal').classList.add('open');
+  _openModalReset();
+}
+
+function _openModalReset(){
+  const box = document.getElementById('modal-box');
+  if(!box) return;
+  // Reset position to center
+  box.style.position = '';
+  box.style.left = '';
+  box.style.top  = '';
+  box.style.margin = '';
+  // Apply saved size
+  if(window._applyModalSize) window._applyModalSize();
+  // Scroll body to top
+  const body = box.querySelector('.modal-body');
+  if(body) body.scrollTop = 0;
+}
+function clearForm(){
+  ['f-kh','f-ks','f-km','f-kyp','f-kyk','f-kyl','f-kys','f-lm','f-ls','f-lyk','f-lyl','f-lys','f-ovq','f-rem','f-moy','f-top','f-kas','f-kred','f-samar'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('f-ihq').value='600000';
+  document.getElementById('f-stat').value='tugallandi';
+  document.getElementById('kc-rows').innerHTML='';
+  document.getElementById('lc-rows').innerHTML='';
+  kcCount=0; lcCount=0;
+}
+function addCRow(dir, data={}){
+  const id=dir==='k'?++kcCount:++lcCount;
+  const row=document.createElement('div'); row.className='crow'; row.id=`${dir}cr${id}`;
+  row.innerHTML=`
+    <input type="text" placeholder="Kimdan" value="${data.kimdan||''}">
+    <input type="text" placeholder="Kimga" value="${data.kimga||''}">
+    <input type="text" placeholder="Yuk nomi" value="${data.yukNomi||''}">
+    <input type="number" placeholder="Kg" value="${data.kg||''}">
+    <input type="number" placeholder="Narh" value="${data.narh||''}">
+    <input type="number" placeholder="Summa" value="${data.summa||''}">
+    <input type="number" placeholder="Olindi" value="${data.olindi||''}">
+    <button class="btn-rmv" onclick="this.parentElement.remove()">×</button>`;
+  document.getElementById(dir==='k'?'kc-rows':'lc-rows').appendChild(row);
+}
+function getCargo(dir){
+  return Array.from(document.querySelectorAll(`#${dir==='k'?'kc-rows':'lc-rows'} .crow`)).map(row=>{
+    const inp=row.querySelectorAll('input');
+    const summa=parseFloat(inp[5].value)||0;
+    const olindi=parseFloat(inp[6].value)||0;
+    return {kimdan:inp[0].value.trim(),kimga:inp[1].value.trim(),yukNomi:inp[2].value.trim(),kg:parseFloat(inp[3].value)||0,narh:parseFloat(inp[4].value)||0,summa,olindi,koldi:Math.max(0,summa-olindi)};
+  }).filter(c=>c.summa>0||c.yukNomi);
+}
+function saveReys(){
+  const n=v=>parseFloat(document.getElementById(v).value)||0;
+  const s=v=>document.getElementById(v).value.trim();
+  const reys={
+    id:S.editIdx>=0?S.reyslar[S.editIdx].id:Date.now(),
+    reysNum:parseInt(s('f-rnum'))||S.reyslar.length+1,
+    auto:s('f-auto')||'566',
+    haydovchi:s('f-kh'),
+    ketish:{sana:s('f-ks'),manzil:s('f-km'),haydovchi:s('f-kh'),yolPul:n('f-kyp'),yoqKimdan:s('f-kyk'),yoqLitr:n('f-kyl'),yoqSumma:n('f-kys'),cargo:getCargo('k')},
+    kelish:{sana:s('f-ls'),manzil:s('f-lm'),yoqKimdan:s('f-lyk'),yoqLitr:n('f-lyl'),yoqSumma:n('f-lys'),cargo:getCargo('l')},
+    fin:{ishHaqi:n('f-ihq')||600000,ovqatlanish:n('f-ovq'),remont:n('f-rem'),moyka:n('f-moy'),topshirilgan:n('f-top'),kassa:n('f-kas'),kreditorlik:n('f-kred'),samarodorlik:n('f-samar'),rasxod:0,jamiXarajat:n('f-yoq')+n('f-ihq')+n('f-ovq')+n('f-rem')+n('f-moy')},
+    status:s('f-stat'),
+    notes:S.editIdx>=0?S.reyslar[S.editIdx].notes:[]
+  };
+  reys.fin.rasxod=reys.ketish.yoqSumma+reys.kelish.yoqSumma+reys.fin.ishHaqi+reys.fin.ovqatlanish+reys.fin.remont+reys.fin.moyka;
+  reys.fin.jamiXarajat=reys.fin.rasxod;
+  if(S.editIdx>=0) S.reyslar[S.editIdx]=reys; else S.reyslar.push(reys);
+  saveLocal(); closeModal();
+  S.curReys=reys; renderAll(); showPage('reys');
+  if(S.useYD) saveToYD();
+}
+function closeModal(){ document.getElementById('rmodal').classList.remove('open'); }
+
+// ══════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════
+function showPage(name, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+  else document.querySelectorAll('.ntab').forEach(t=>{ if(t.getAttribute('onclick')&&t.getAttribute('onclick').includes("'"+name+"'")) t.classList.add('active'); });
+}
+
+function showSettings(){
+  const nt=prompt('Yangi token (bo\'sh = o\'zgarmaydi):','');
+  if(nt){ S.token=nt; localStorage.setItem('yd_token',nt); alert('Saqlandi!'); }
+}
+
+// ══════════════════════════════════════════
+// HAYDOVCHI JSON IMPORT
+// ══════════════════════════════════════════
+function openImportJSON(){
+  document.getElementById('import-modal').classList.add('open');
+  document.getElementById('import-preview').style.display='none';
+  document.getElementById('import-json-text').value='';
+}
+
+function loadImportFile(evt){
+  const file=evt.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{ document.getElementById('import-json-text').value=e.target.result; previewImport(); };
+  reader.readAsText(file);
+}
+
+function previewImport(){
+  const raw=document.getElementById('import-json-text').value.trim();
+  if(!raw){ alert('JSON kiriting!'); return; }
+  try{
+    const d=JSON.parse(raw);
+    const m=d.meta||{};
+    const kk=[...(d.ketishCargo||[]),...(d.kelishCargo||[])];
+    const jYuk=kk.reduce((s,c)=>s+(c.summa||0),0);
+    const jKoldi=kk.reduce((s,c)=>s+(c.koldi||0),0);
+    const jYoq=(d.yoqilgi||[]).reduce((s,f)=>s+(f.summa||0),0);
+    const jLitr=(d.yoqilgi||[]).reduce((s,f)=>s+(f.litr||0),0);
+    const jIhq=(d.ishHaqi||[]).reduce((s,ih)=>s+(ih.miqdor||0),0);
+    const prev=document.getElementById('import-preview');
+    prev.style.display='';
+    prev.innerHTML=`
+      <div style="font-weight:700;margin-bottom:8px;color:var(--green)">✅ JSON to'g'ri — Ko'rib chiqing:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div><span style="color:var(--text2)">Reys:</span> <b>#${m.reysNum}</b></div>
+        <div><span style="color:var(--text2)">Avto:</span> <b>${m.avtoNum}</b></div>
+        <div><span style="color:var(--text2)">Haydovchi:</span> <b>${m.haydovchi}</b></div>
+        <div><span style="color:var(--text2)">Sana:</span> <b>${m.ketishSana}→${m.kelishSana}</b></div>
+        <div><span style="color:var(--text2)">Yuk summa:</span> <b style="color:var(--green)">${fmt(jYuk)}</b></div>
+        <div><span style="color:var(--text2)">Qoldi:</span> <b style="color:var(--red)">${fmt(jKoldi)}</b></div>
+        <div><span style="color:var(--text2)">Yoqilg'i:</span> <b style="color:var(--yellow)">${jLitr}L = ${fmt(jYoq)}</b></div>
+        <div><span style="color:var(--text2)">Ish haqi:</span> <b style="color:var(--purple)">${fmt(jIhq)}</b></div>
+        <div><span style="color:var(--text2)">Ketish yuklar:</span> <b>${(d.ketishCargo||[]).length} ta</b></div>
+        <div><span style="color:var(--text2)">Kelish yuklar:</span> <b>${(d.kelishCargo||[]).length} ta</b></div>
+      </div>`;
+    window._pendingImport=d;
+  } catch(e){ alert('JSON xato: '+e.message); }
+}
+
+function confirmImport(){
+  const d=window._pendingImport;
+  if(!d){ alert('Avval "Ko\'rish" tugmasini bosing!'); return; }
+  importDriverReport(d);
+  document.getElementById('import-modal').classList.remove('open');
+  alert('✅ Hisobot import qilindi!');
+}
+
+function importDriverReport(d){
+  const m=d.meta||{};
+  // Check if reys already exists
+  const existing=S.reyslar.find(r=>r.reysNum===m.reysNum && r.auto===m.avtoNum);
+
+  const buildCargo=(arr)=>(arr||[]).map(c=>({
+    kimdan:  c.kimdan||'',
+    kimga:   c.kimga||'',
+    yukNomi: c.yukNomi||'',
+    kg:      c.soni||c.kg||0,
+    narh:    c.narh||0,
+    summa:   c.summa||0,
+    olindi:  c.olindi||0,
+    koldi:   c.koldi||0,
+  }));
+
+  const yoqK=((d.yoqilgi||[]).filter(f=>f.yonalish==='ketish'));
+  const yoqL=((d.yoqilgi||[]).filter(f=>f.yonalish==='kelish'));
+  const yoqKSum=yoqK.reduce((s,f)=>s+(f.summa||0),0);
+  const yoqLSum=yoqL.reduce((s,f)=>s+(f.summa||0),0);
+  const yoqKL=yoqK.reduce((s,f)=>s+(f.litr||0),0);
+  const yoqLL=yoqL.reduce((s,f)=>s+(f.litr||0),0);
+
+  const ihJami=(d.ishHaqi||[]).reduce((s,ih)=>s+(ih.miqdor||0),0);
+  const ypJami=(d.yolPul||[]).reduce((s,y)=>s+(y.miqdor||0),0);
+  const bx=d.boshqaXarajat||{};
+  const yoqTotal=yoqKSum+yoqLSum;
+  const jamiXarajat=yoqTotal+ihJami+(bx.ovqatlanish||0)+(bx.remont||0)+(bx.moyka||0)+(bx.boshqa||0);
+
+  const reys={
+    id:       existing?existing.id:Date.now(),
+    reysNum:  m.reysNum,
+    auto:     m.avtoNum||'566',
+    haydovchi:m.haydovchi||'',
+    // Yoqilgi detail for reference
+    yoqilgiDetail: d.yoqilgi||[],
+    ketish:{
+      haydovchi: m.haydovchi||'',
+      sana:      m.ketishSana||'',
+      manzil:    m.ketishShahar||'',
+      yolPul:    ypJami,
+      yoqKimdan: yoqK.map(f=>f.qayer).filter(Boolean).join(', '),
+      yoqLitr:   yoqKL,
+      yoqSumma:  yoqKSum,
+      cargo:     buildCargo(d.ketishCargo),
+      // Extra detail
+      zakazKim:  d.ketishDetail?.zakazKim||'',
+      shartnoma: d.ketishDetail?.shartnoma||'',
+      sklad:     d.ketishDetail?.sklad||'',
+      manzilToliq: d.ketishDetail?.manzilToliq||'',
+    },
+    kelish:{
+      haydovchi: m.haydovchi||'',
+      sana:      m.kelishSana||'',
+      manzil:    m.kelishShahar||'',
+      yoqKimdan: yoqL.map(f=>f.qayer).filter(Boolean).join(', '),
+      yoqLitr:   yoqLL,
+      yoqSumma:  yoqLSum,
+      cargo:     buildCargo(d.kelishCargo),
+      qabulKim:  d.kelishDetail?.qabulKim||'',
+      manzilToliq: d.kelishDetail?.manzilToliq||'',
+    },
+    fin:{
+      ishHaqi:      ihJami,
+      ovqatlanish:  bx.ovqatlanish||0,
+      remont:       bx.remont||0,
+      moyka:        bx.moyka||0,
+      topshirilgan: bx.topshirilgan||0,
+      rasxod:       jamiXarajat,
+      jamiXarajat,
+      kassa:        (bx.topshirilgan||0),
+      kreditorlik:  0,
+      samarodorlik: 0,
+    },
+    status: 'tugallandi',
+    notes:  [],
+    importedFrom: 'haydovchi',
+    importTime: m.exportVaqt||'',
+  };
+
+  if(existing){
+    const idx=S.reyslar.indexOf(existing);
+    S.reyslar[idx]=reys;
+  } else {
+    S.reyslar.push(reys);
+  }
+
+  saveLocal();
+  renderAll();
+  if(S.useYD) saveToYD();
+}
+const fmt=n=>(n||0).toLocaleString('ru-RU');
+const fmtM=n=>{ const m=Math.round((n||0)/1000); return m>=1000?`${(m/1000).toFixed(1)}M`:`${m}K`; };
+const fmtK=n=>{ const m=Math.round((n||0)/1000); return `${m}K`; };
+const cSum=cargo=>(cargo||[]).reduce((s,c)=>s+(c.summa||0),0);
+</script>
+</body>
+</html>
